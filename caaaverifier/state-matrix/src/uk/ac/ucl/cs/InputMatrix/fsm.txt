@@ -1,0 +1,57 @@
+Name = "Adaptation FSM"
+States = {0-3}
+InputAlphabet = {A3,D3,A4,D4}
+Start = 0
+Forbidden = {3}
+Transition = (0,A3)->1 
+    (0,A4)->2 
+    (1,A4)->3 
+    (1,D3)->0 
+    (2,A3)->3 
+    (2,D4)->0           
+Trigger = 0-(T1,T2)
+    1-(T1,T2,T3)
+    2-(T1,T2,T4)
+Priority = (T2,6)
+           (T3,9)
+           (T4,9)
+           (A3,0)
+           (D3,0)
+           (A4,0)
+           (D4,0)
+ContextTypes = (t,Time,1)
+           (bt,Bluetooth,60000)
+           (gps,GPS,1000)
+ContextVariables = (A_bt,bt)
+                   (B_t,t)
+                   (C_bt,bt)
+                   (D_gps,gps)
+                   (E_t,t)
+                   (F_bt,bt)
+                   (G_gps,gps)
+                   (H_t,t)
+                   (I_bt,bt)
+                   (L_gps,gps)
+                   (M_t,t)
+                   (N_bt,bt)
+                   (O_gps,gps)
+PredicateAbbr = (T1,A_bt)
+                (T2,B_t \AND (C_bt \OR D_gps))
+                (A3,E_t \AND \NOT(F_bt \OR G_gps))
+                (D3,H_t \OR (F_bt \OR G_gps))
+                (T3,\NOT I_bt \AND \NOT L_gps)
+                (A4,M_t \AND \NOT(N_bt \OR O_gps))
+                (D4,E_t \OR (N_bt \OR O_gps))
+                (T4,\NOT I_bt \AND \NOT L_gps)
+
+                     
+ConstraintPair = (\NOT A_bt, \NOT C_bt)
+				 (\NOT A_bt, \NOT I_bt)
+                       
+
+               
+               
+               
+
+                         
+                           

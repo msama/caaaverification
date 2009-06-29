@@ -1,0 +1,148 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 TRANSITIONAL//EN">
+<html>
+
+	<head>
+		<title></title>
+	</head>
+	<body>
+<table>
+	<tr>
+		<td>Name</td>
+		<td>InitialState</td>
+		<td>FinalState</td>
+		<td>Predicate</td>
+		<td>Boolean</td>
+		<td>Priority</td>
+	</tr>
+	<tr>
+		<td>ActivateOutdoor</td>
+		<td>Normal</td>
+		<td>Outdoor</td>
+		<td>GPS.isValid() and !GPS.location()=home and !GPS.location()=office</td>
+		<td>A_gps and !B_gps and !C_gps</td>
+		<td>5</td>
+	</tr>
+	<tr>
+		<td>DeactivateOutdoor</td>
+		<td>Outdoor</td>
+		<td>Idle</td>
+		<td>!ActivateOutdoor</td>
+		<td>!(A_gps and B_gps and C_gps)</td>
+		<td>5</td>
+	</tr>
+	<tr>
+		<td>ActivateJogging</td>
+		<td>Outdoor</td>
+		<td>Jogging</td>
+		<td>GPS.isValid() and GPS.speed()>5</td>
+		<td>A_gps and D_gps</td>
+		<td>5</td>
+	</tr>
+	<tr>
+		<td>DeactivateJogging</td>
+		<td>Jogging</td>
+		<td>Outdoor</td>
+		<td>!ActivateJogging</td>
+		<td>!(A_gps and D_gps)</td>
+		<td>5</td>
+	</tr>
+	<tr>
+		<td>ActivateDriving</td>
+		<td> Idle , Outdoor, Home, Office</td>
+		<td>Driving</td>
+		<td>BT={"Car_handsfree"}</td>
+		<td>A_bt</td>
+		<td>1</td>
+	</tr>
+	<tr>
+		<td>DeactivateDriving</td>
+		<td>Driving</td>
+		<td>Idle</td>
+		<td>!ActivateDriving</td>
+		<td>!A_bt</td>
+		<td>1</td>
+	</tr>
+	<tr>
+		<td>ActivateDrivingFast</td>
+		<td>Driving</td>
+		<td>DrivingFast</td>
+		<td>GPS.isValid() and GPS.speed()>70</td>
+		<td>A_gps and E_gps</td>
+		<td>0</td>
+	</tr>
+	<tr>
+		<td>DeactivateDrivingFast</td>
+		<td>DrivingFast</td>
+		<td>Driving</td>
+		<td>!ActivateDrivingFast</td>
+		<td>!(A_gps and E_gps)</td>
+		<td>0</td>
+	</tr>
+	<tr>
+		<td>ActivateHome</td>
+		<td>Idle, Outdoor, Synch</td>
+		<td>Home</td>
+		<td>BT={home_pc} or (GPS.isValid() and GPS.location()=home)</td>
+		<td>B_bt or (A_gps and B_gps)</td>
+		<td>5</td>
+	</tr>
+	<tr>
+		<td>DeactivateHome</td>
+		<td>Home</td>
+		<td>Idle</td>
+		<td>!ActivateHome</td>
+		<td>!(B_bt or (A_gps and B_gps))</td>
+		<td>5</td>
+	</tr>
+	<tr>
+		<td>ActivateOffice</td>
+		<td>Idle, Outdoor, Synch</td>
+		<td>Office</td>
+		<td>BT={office_pc} or BT={office_pc_*} or (GPS.isValid() and GPS.location()=office)</td>
+		<td>C_bt or D_bt or (A_gps and C_gps)</td>
+		<td>5</td>
+	</tr>
+	<tr>
+		<td>DeactivateOffice</td>
+		<td>Office</td>
+		<td>Idle</td>
+		<td>!ActivateOffice</td>
+		<td>!(C_bt or D_bt  or (A_gps and C_gps))</td>
+		<td>5</td>
+	</tr>
+	<tr>
+		<td>ActivateMeeting</td>
+		<td>Office</td>
+		<td>Meeting</td>
+		<td>Time>=meeting_start and BT.count()>=3</td>
+		<td>A_t and E_bt</td>
+		<td>4</td>
+	</tr>
+	<tr>
+		<td>DeactivateMeeting</td>
+		<td>Meeting</td>
+		<td>Office</td>
+		<td>Time>=meeting_end</td>
+		<td>B_t</td>
+		<td>4</td>
+	</tr>
+	<tr>
+		<td>ActivateSynch</td>
+		<td>Idle</td>
+		<td>Synch</td>
+		<td>BT={home_pc} or BT={office_pc}</td>
+		<td>B_bt and C_bt</td>
+		<td>9</td>
+	</tr>
+	<tr>
+		<td>DeactivateSynch</td>
+		<td>Synch</td>
+		<td>Idle</td>
+		<td>!ActivateSynch</td>
+		<td>!(B_bt and C_bt)</td>
+		<td>9</td>
+	</tr>
+</table>
+
+	</body>
+</html>
