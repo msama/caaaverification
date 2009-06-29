@@ -1,0 +1,228 @@
+Package uk.ac.ucl.cs.InputMatrix.myparser;
+Helpers
+	digit = ['0' .. '9'];
+	special_char = '_';//[[['#' .. '&'] + ['.' .. '/']] + ['^' .. '`']];
+	pure_letter = [['a' .. 'z'] + ['A' .. 'Z']];
+	letter = pure_letter | special_char;	
+	cr = 13;
+	lf = 10;
+	ascii_char = [[32 .. 127] - [cr + lf]];
+	normal_char = [['a' .. 'z'] + ['A' .. 'Z']];
+	char_without_space = [[33 .. 127] - [cr + lf]];
+	identifier = letter (letter | digit)*;
+	integer = (['0' .. '9']) digit*;
+Tokens
+	head_pos = 'L' | 'R';		
+	blank = (' ' | 13 | 10 | 9)+;	//space, Line Feed, Carriage Return, Horizontal tab
+	space = 'space';
+	crlf = 'crlf';
+	l_brace = '{';
+	r_brace = '}';
+	arrow = '->';
+	l_par = '(';
+ 	r_par = ')';
+ 	string = '"' [ascii_char - '"']* '"';
+ 	comma = ','; 
+ 	hyphen = '-';	
+ 	equal = '=';
+ 	name = 'N' | 'Name';
+ 	state = 'Q' | 'States';
+ 	input_alpha = 'I' | 'InputAlphabet';
+ 	start = 'q' | 'Start';
+ 	forbidden = 'F' | 'Forbidden';
+ 	transition_func = 'd' | 'Transition';
+	trigger = 'T' | 'Trigger';
+	priority = 'P' | 'Priority';
+	
+	context_types = 'ContextTypes';
+	context_variables = 'ContextVariables';
+	predicate_abbr = 'PredicateAbbr';
+	predicates_for_state = 'PredicatesForState';
+	constraint_pair = 'ConstraintPair';
+	variable_abbr = 'VariableAbbr';
+ 	id = identifier;
+ 	int = integer;
+ 	scope_char = integer '-' integer | identifier '-' identifier;
+ 	my_char = char_without_space;
+ 	number = digit+;
+ 	//priority_setting_value = (identifier '.' identifier (('+' | '-') integer)?) | identifier | integer;
+ 	priority_setting_value = integer;
+ 	
+ 	l_or = '\OR';
+ 	l_and = '\AND';
+ 	l_not = '\NOT';
+ 	
+	l_in = '\IN';
+	l_gt = '\GT';
+	l_lt = '\LT';
+	l_eq = '\EQ';
+	l_le = '\LE';
+	l_neq = '\NEQ';
+	l_ge = '\GE';
+	
+	dist = '$Distance';
+	
+Ignored Tokens
+ 	blank;
+
+ 
+Productions
+	specs = {fsm} fsm_spec;
+ 	fsm_spec = 
+ 		fsm_name
+ 		fsm_state
+ 		fsm_input_alpha
+ 		fsm_start
+ 		fsm_forbidden
+ 		fsm_transition
+ 		fsm_trigger
+ 		fsm_priority
+ 		fsm_context_types
+ 		fsm_context_variables
+ 		fsm_predicate_abbr
+ 		//fsm_predicates_for_state
+ 		fsm_constraint_pair
+ 		//fsm_variable_abbr
+ 		;
+ 	
+ 	fsm_name = name equal string;
+ 	
+ 	fsm_state = state equal l_brace state_list r_brace;
+ 	state_list = 	
+ 		{single} state_alpha |
+		{scope} state_scope |	
+		{sequence1} state_list comma state_alpha |
+		{sequence2} state_list comma state_scope;
+		
+	state_alpha =  factor;
+	state_scope = scope_char;
+
+	fsm_input_alpha = input_alpha equal l_brace input_alpha_list r_brace;	
+	input_alpha_list = 
+		{single} my_input_alpha |
+		{scope} input_scope |
+		{sequence1} input_alpha_list comma my_input_alpha |
+		{sequence2} input_alpha_list comma input_scope;
+	my_input_alpha = factor;
+	input_scope = scope_char;
+
+		
+	fsm_start = start equal start_alpha;
+	start_alpha = factor;
+	
+	fsm_forbidden = forbidden equal l_brace forbidden_state_list r_brace;
+	forbidden_state_list = state_list | {empty};
+	//forbidden_alpha = {factor} factor | {empty};	
+	
+	//Transition = (0,A3)->1 
+	fsm_transition = transition_func equal transition_list;
+	transition_list = 
+			{single} one_transition |
+			{sequence} transition_list  one_transition;
+	one_transition = {fsm} [l1]:l_par [state1]:my_state_alpha1 [c]:comma [alpha]:my_transition_input_alpha [r1]:r_par arrow [state2]:my_state_alpha2;
+	my_state_alpha1 = factor;
+	my_transition_input_alpha = factor;
+	my_state_alpha2 = factor;
+	
+	fsm_trigger = trigger equal trigger_list?;
+	trigger_list = 
+			{single} my_trigger |
+			{sequence} trigger_list my_trigger;
+			
+	my_trigger = {statetrigger} [state]:my_trigger_state_alpha hyphen [lp]:l_par [multi_triggers]:triggers [rp]:r_par;
+	
+	my_trigger_state_alpha = factor;
+	
+	triggers = {single} atrigger |
+		   {sequence} triggers comma atrigger;
+	atrigger = factor;
+	
+	fsm_priority = priority equal priority_list | {empty} priority equal;
+	priority_list = {single} my_priority |
+			{sequence} priority_list my_priority;
+	my_priority = {triggerpriority} l_par [trigger]:my_trigger_alpha comma priority_setting r_par;
+	my_trigger_alpha = factor;
+	//priority_setting = priority_setting_value;
+	priority_setting = {integer}int;
+	
+	fsm_context_types = context_types equal type_list;
+	type_list = {single} my_type | {sequence} type_list my_type;
+	my_type = l_par [shorttypename]:type_abbr [comma1]:comma [fulltypename]:type_name [comma2]:comma refresh_rate r_par;
+	type_abbr = factor;
+	type_name = factor;
+	refresh_rate = {integer} int;
+	
+	fsm_context_variables = context_variables equal variable_list;
+	variable_list = {single} my_variable | {sequence} variable_list my_variable;
+	my_variable = l_par [var_name]:variable_name comma [shorttypename]:var_type_name r_par;
+	variable_name = factor;
+	var_type_name = factor;
+	
+	//-----------------------
+	fsm_predicate_abbr = predicate_abbr equal predicate_list;
+	predicate_list = {single} my_predicate | {sequence} predicate_list my_predicate;
+	my_predicate = l_par predicate_name comma predicate_logic r_par;
+	predicate_name = {pred_name}factor;
+	
+	predicate_logic = logic_or_exp;
+	logic_or_exp = [and1]:logic_and_exp l_or [and2]:logic_and_exp | {empty} logic_and_exp;
+	logic_and_exp = [unary1]:unary_exp l_and [unary2]:unary_exp | {empty} unary_exp;
+	unary_exp = {notunary} l_not unary_exp
+			| {primexp} primary_exp;
+	primary_exp =  {exp}factor | {parenexp} paren_exp;
+	paren_exp = l_par predicate_logic r_par;
+	
+	//-----------------------------
+	
+	//fsm_predicates_for_state = predicates_for_state equal predicates_for_state_list;
+	//predicates_for_state_list = {single} my_predicates_for_state | {sequence} predicates_for_state_list my_predicates_for_state;
+	//my_predicates_for_state = l_par my_state_name comma l_brace predicates_set r_brace r_par;
+	//my_state_name = factor;
+	//predicates_set = {single} one_predicate_for_state | {sequence} predicates_set comma one_predicate_for_state;
+	//one_predicate_for_state = factor;
+	
+	//-----------------------------
+	fsm_constraint_pair = constraint_pair equal constraint_pair_list?;
+	constraint_pair_list = {single} my_constraint_pair | {sequence} constraint_pair_list my_constraint_pair;
+	my_constraint_pair = l_par condition_predicate comma effect_predicate r_par;
+	condition_predicate = predicate_logic;
+	effect_predicate = predicate_logic;
+	
+	
+	//-----------------------------
+	fsm_variable_abbr = variable_abbr equal abbr_variable_list;
+	abbr_variable_list = {single} one_variable_pair | {sequence} abbr_variable_list one_variable_pair;
+	one_variable_pair = l_par abbr_variable_name comma binary_logic_exp r_par;
+	abbr_variable_name = factor;
+	
+	binary_logic_exp = {bt} bt_clients l_in bt_set_name
+			| {distance} distance_func equality_logic distance_value 
+			| {common} equality_exp;
+	
+	//binary_logic_exp = equality_exp;
+	equality_exp = {logic_eq} [eq1]:relation_exp l_eq [eq2]:relation_exp
+			 | {logic_neq} [neq1]:relation_exp l_neq [neq2]:relation_exp
+			 | {empty} relation_exp;
+	relation_exp = {logic_gt} [gt1]:my_unary_exp l_gt [gt2]:my_unary_exp
+			 | {logic_lt} [lt1]:my_unary_exp l_lt [lt2]:my_unary_exp
+			 | {logic_le} [le1]:my_unary_exp l_le [le2]:my_unary_exp
+			 | {logic_ge} [ge1]:my_unary_exp l_ge [ge2]:my_unary_exp
+			 | {empty} my_unary_exp;
+	my_unary_exp = factor;
+	
+	bt_clients = l_brace bt_value_list r_brace;
+	bt_value_list = {bt_exp} predicate_logic;
+	bt_set_name = factor;
+	
+	distance_func = dist l_par location_name r_par;
+	distance_value = factor;
+	location_name = factor;
+	
+
+	equality_logic = {gt} l_gt | {lt} l_lt | {eq} l_eq | {le} l_le | {neq} l_neq | {ge} l_ge;
+	
+	
+	factor =    {identifier} id |
+                    {integer} int;
+	
+				

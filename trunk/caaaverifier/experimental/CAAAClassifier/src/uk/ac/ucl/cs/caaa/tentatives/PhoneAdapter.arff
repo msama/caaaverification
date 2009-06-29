@@ -1,0 +1,19 @@
+@RELATION	PhoneAdapter
+
+@ATTRIBUTE 	State	{Idle, Outdoor, Jogging, Driving, DrivingFast, Home, Office, Meeting, Synch}
+@ATTRIBUTE 	Location_valid	{True, False}
+@ATTRIBUTE 	Longitude	NUMERIC
+@ATTRIBUTE 	Latitude	NUMERIC
+@ATTRIBUTE 	Altitude	NUMERIC
+@ATTRIBUTE 	BlueTooth_enable	{True, False}
+@ATTRIBUTE 	BlueTooth_detected	NUMERIC
+@ATTRIBUTE 	BlueTooth_names	STRING
+@ATTRIBUTE 	Calendar	{Empty, Meeting, Reminder}
+@ATTRIBUTE 	NextState	{Idle, Outdoor, Jogging, Driving, DrivingFast, Home, Office, Meeting, Synch}
+
+@DATA
+Idle, False, 0, 0, 0, False, ?, ?, Empty, Idle 
+Idle, False, 0, 0, 0, True, 1, '{handset}', Empty, Idle  
+Idle, True, 0, 0, 0, False, ?, ?, Empty, Outdoor
+Idle, True, 90, 90, 30, False, ?, ?, Empty, Outdoor
+Idle, True, 90, 90, 500, True, 1, '{handset}', Empty, Outdoor

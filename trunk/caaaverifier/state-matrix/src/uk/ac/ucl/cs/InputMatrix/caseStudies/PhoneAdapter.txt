@@ -1,0 +1,101 @@
+Name = "PhoneAdapter"
+States = {Idle,Outdoor,Jogging,Driving,DrivingFast,Home,Office,Meeting,Synch}
+InputAlphabet = {ActivateOutdoor,DeactivateOutdoor,ActivateJogging,DeactivateJogging,ActivateDriving,DeactivateDriving,ActivateDrivingFast,DeactivateDrivingFast,ActivateHome,DeactivateHome,ActivateOffice,DeactivateOffice,ActivateMeeting,DeactivateMeeting,ActivateSynch,DeactivateSynch}
+Start = Idle
+Forbidden = {}
+Transition = (Idle,ActivateOutdoor)->Outdoor
+    (Outdoor,DeactivateOutdoor)->Idle
+    (Outdoor,ActivateJogging)->Jogging
+    (Jogging,DeactivateJogging)->Outdoor
+    (Idle,ActivateDriving)->Driving
+    (Outdoor,ActivateDriving)->Driving
+    (Home,ActivateDriving)->Driving
+    (Office,ActivateDriving)->Driving
+    (Driving,DeactivateDriving)->Idle          
+    (Driving,ActivateDrivingFast)->DrivingFast
+    (DrivingFast,DeactivateDrivingFast)->Driving
+    (Idle,ActivateHome)->Home
+    (Outdoor,ActivateHome)->Home
+    (Home,DeactivateHome)->Idle
+    (Idle,ActivateOffice)->Office
+    (Outdoor,ActivateOffice)->Office
+    (Synch,ActivateOffice)->Office
+    (Office,DeactivateOffice)->Idle
+    (Office,ActivateMeeting)->Meeting
+    (Meeting,DeactivateMeeting)->Office
+    (Office,ActivateSynch)->Synch
+    (Synch,DeactivateSynch)->Office
+Trigger = Idle-(Dummy_Trigger)
+Priority = (Dummy_Trigger,9)
+        (ActivateOutdoor,4)
+        (DeactivateOutdoor,4)
+        (ActivateJogging,4)
+        (DeactivateJogging,4)
+        (ActivateDriving,1)
+        (DeactivateDriving,1)
+        (ActivateDrivingFast,0)
+        (DeactivateDrivingFast,0)
+        (ActivateHome,3)
+        (DeactivateHome,3)
+        (ActivateOffice,3)
+        (DeactivateOffice,3)
+        (ActivateMeeting,2)
+        (DeactivateMeeting,2)
+        (ActivateSynch,5)
+        (DeactivateSynch,5)
+ContextTypes = (t,Time)
+           (bt,Bluetooth)
+           (gps,GPS)
+           (s,SYNCH)
+ContextVariables = (A_gps,gps)
+                   (B_gps,gps)
+                   (C_gps,gps)
+                   (D_gps,gps)
+                   (E_gps,gps)
+                   (F_gps,gps)
+                   (G_gps,gps)
+                   (A_bt,bt)
+                   (B_bt,bt)
+                   (C_bt,bt)
+                   (D_bt,bt)
+                   (E_bt,bt)
+                   (A_t,t)
+                   (B_t,t)
+                   (A_s,s)
+                   (Dummy_s,s)
+PredicateAbbr = (Dummy_Trigger,Dummy_s)
+           (ActivateOutdoor,A_gps \AND (B_gps \AND C_gps))
+           (DeactivateOutdoor,\NOT(A_gps \AND (B_gps \AND C_gps)))
+           (ActivateJogging,A_gps \AND D_gps)
+           (DeactivateJogging,\NOT(A_gps \AND D_gps))
+           (ActivateDriving,A_bt)
+           (DeactivateDriving,\NOT(A_bt))
+           (ActivateDrivingFast,A_gps \AND E_gps)
+           (DeactivateDrivingFast,\NOT(A_gps \AND E_gps))
+           (ActivateHome,B_bt \OR (A_gps \AND F_gps))
+           (DeactivateHome,\NOT(B_bt \OR (A_gps \AND F_gps)))
+           (ActivateOffice,C_bt \OR (D_bt \OR (A_gps \AND G_gps)))
+           (DeactivateOffice,\NOT(C_bt \OR (D_bt \OR (A_gps \AND G_gps))))
+           (ActivateMeeting,A_t \AND E_bt)
+           (DeactivateMeeting,B_t \AND \NOT(A_t \AND E_bt))
+           (ActivateSynch,A_s \AND C_bt)
+           (DeactivateSynch,\NOT(A_s))
+PredicatesForState = (Idle,{ActivateOutdoor,ActivateDriving,ActivateHome,ActivateOffice})
+                     (Outdoor,{DeactivateOutdoor,ActivateJogging})
+                     (Jogging,{DeactivateJogging})
+                     (Driving,{DeactivateDriving,ActivateDrivingFast})
+                     (DrivingFast,{DeactivateDrivingFast})
+                     (Home,{DeactivateHome,ActivateDriving})
+                     (Office,{DeactivateOffice,ActivateMeeting,ActivateSynch,ActivateDriving})
+                     (Meeting,{DeactivateMeeting})
+                     (Synch,{DeactivateSynch})  
+                     
+ConstraintPair = (\NOT A_gps, \NOT B_gps)
+                 (\NOT A_gps, \NOT C_gps)
+                 (\NOT A_gps, \NOT D_gps)
+                 (\NOT A_gps, \NOT E_gps)
+                 (B_gps, \NOT C_gps)
+                 (C_gps, \NOT B_gps)
+                 (E_gps, D_gps)
+                 (B_t, A_t)          
+             
