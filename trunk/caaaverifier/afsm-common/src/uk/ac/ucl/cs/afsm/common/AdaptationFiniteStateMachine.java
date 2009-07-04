@@ -18,6 +18,11 @@ import uk.ac.ucl.cs.afsm.common.predicate.Variable;
  */
 public class AdaptationFiniteStateMachine {
 
+	public AdaptationFiniteStateMachine(String name) {
+		super();
+		this.name = name;
+	}
+
 	/**
 	 * States defined in the {@link AdaptationFiniteStateMachine}.
 	 */
@@ -42,6 +47,8 @@ public class AdaptationFiniteStateMachine {
 	
 	private State initialState;
 
+	private final String name;
+	
 	public Variable variable(String name, Context context) {
 		if (variables.containsKey(name)) {
 			throw new IllegalStateException("A variable with id " + name +
@@ -91,5 +98,9 @@ public class AdaptationFiniteStateMachine {
 	 */
 	public State getInitialState() {
 		return initialState;
+	}
+
+	public String getName() {
+		return name;
 	}
 }
