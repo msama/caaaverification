@@ -10,6 +10,8 @@ package uk.ac.ucl.cs.pddlgen.ebnf;
 public class RequireKey extends Streamable {
 	
 	public static final RequireKey TYPING = null;
+	public static final RequireKey CONSTRAINTS = null; //????????????????
+	public static final RequireKey PREFERENCIES = null;
 	public static final RequireKey SAFETY_CONSTRAINTS = null;
 	public static final RequireKey EXPRESSION_EVALUATION = null;
 	public static final RequireKey DOMAIN_AXIOMS = null;
