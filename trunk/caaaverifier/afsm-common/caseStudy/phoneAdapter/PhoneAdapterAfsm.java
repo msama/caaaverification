@@ -25,7 +25,7 @@ public class PhoneAdapterAfsm implements AfsmBuilder {
 	@Override
 	public AdaptationFiniteStateMachine getAdaptationFiniteStateMachine() {
 		// Create the AFSM
-		AdaptationFiniteStateMachine afsm = new AdaptationFiniteStateMachine();
+		AdaptationFiniteStateMachine afsm = new AdaptationFiniteStateMachine("PhoneAdapter");
 		
 		// Contexts
 		Context time = new Context("Time");

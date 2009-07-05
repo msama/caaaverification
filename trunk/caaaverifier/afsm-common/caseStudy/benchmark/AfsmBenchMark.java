@@ -134,7 +134,7 @@ only change var count: (10, 50, 20), (10, 50, 30)
 	}
 
 	public AdaptationFiniteStateMachine generateAfsm(){
-		afsm = new AdaptationFiniteStateMachine();
+		afsm = new AdaptationFiniteStateMachine("Benchmark");
 		State nodes[] = new State[STATE_COUNT];
 		int idx, priority;
 		int[] outDegree = new int[STATE_COUNT];
