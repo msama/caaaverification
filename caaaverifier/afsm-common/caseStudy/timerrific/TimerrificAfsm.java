@@ -30,7 +30,7 @@ public class TimerrificAfsm implements AfsmBuilder {
 	@Override
 	public AdaptationFiniteStateMachine getAdaptationFiniteStateMachine() {
 		// Create the AFSM
-		AdaptationFiniteStateMachine afsm = new AdaptationFiniteStateMachine();
+		AdaptationFiniteStateMachine afsm = new AdaptationFiniteStateMachine("Timerrific");
 
 		// Contexts
 		Context time = new Context("Time");
