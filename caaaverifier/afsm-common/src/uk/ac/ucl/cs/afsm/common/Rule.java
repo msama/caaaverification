@@ -5,10 +5,13 @@ package uk.ac.ucl.cs.afsm.common;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import uk.ac.ucl.cs.afsm.common.predicate.Constant;
 import uk.ac.ucl.cs.afsm.common.predicate.Predicate;
+import uk.ac.ucl.cs.afsm.common.predicate.Variable;
 
 /**
  * Defines an adaptation rule which from a set of current states in which
@@ -70,6 +73,15 @@ public class Rule {
 		}
 	}
 
+	public Set<Variable> getAllVariables() {
+		Set<Variable> vars = new HashSet<Variable>();
+		Variable.getAllVariables(trigger, vars);
+		for (Assignment assignment : action) {
+			vars.add(assignment.variable);
+		}
+		return vars;
+	}
+	
 	/**
 	 * @return the name
 	 */
