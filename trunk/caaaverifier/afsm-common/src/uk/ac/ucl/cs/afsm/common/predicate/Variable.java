@@ -3,6 +3,9 @@
  */
 package uk.ac.ucl.cs.afsm.common.predicate;
 
+import java.util.List;
+import java.util.Set;
+
 import uk.ac.ucl.cs.afsm.common.Context;
 
 /**
@@ -76,5 +79,29 @@ public class Variable implements Predicate {
 	 */
 	public void setContext(Context context) {
 		this.context = context;
+	}
+	
+	public static void getAllVariables(Predicate predicate, Set<Variable> set) {
+		if (predicate == Constant.TRUE) {
+			return;
+		} else if (predicate == Constant.FALSE) {
+			return;
+		} if (predicate instanceof Variable) {
+			set.add((Variable)predicate);
+			return;
+		} else if (predicate instanceof Operator.Not) {
+			Operator.Not not = (Operator.Not) predicate;
+			getAllVariables(not.getPredicate(), set);
+		} else if (predicate instanceof Operator.And) {
+			Operator.And and = (Operator.And) predicate;
+			for (int i = 0; i < and.size(); i++) {
+				getAllVariables(and.get(i), set);
+			}
+		} else if (predicate instanceof Operator.Or) {
+			Operator.Or or = (Operator.Or) predicate;
+			for (int i = 0; i < or.size(); i++) {
+				getAllVariables(or.get(i), set);
+			}
+		}
 	}
 }
