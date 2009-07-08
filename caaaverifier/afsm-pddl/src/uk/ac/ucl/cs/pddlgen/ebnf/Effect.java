@@ -19,7 +19,7 @@ public abstract class Effect extends Streamable {
 		
 		Effect effect = new Effect(){ 
 			protected void printInternal() {
-				writeInto(and);
+				writeInto(pw, and);
 			}
 		};
 		return effect;
@@ -36,7 +36,7 @@ public abstract class Effect extends Streamable {
 				pw.print("(not ");
 				++alignment;
 				align();
-				writeInto(formula);
+				writeInto(pw, formula);
 				--alignment;
 				align();
 				pw.print(")");
@@ -53,7 +53,7 @@ public abstract class Effect extends Streamable {
 		
 		Effect effect = new Effect(){ 
 			protected void printInternal() {
-				writeInto(formula);
+				writeInto(pw, formula);
 			}
 		};
 		return effect;
@@ -80,9 +80,9 @@ public abstract class Effect extends Streamable {
 				pw.print("(not ");
 				++alignment;
 				align();
-				writeInto(vars);
+				writeInto(pw, vars);
 				align();
-				writeInto(effect);
+				writeInto(pw, effect);
 				--alignment;
 				align();
 				pw.print(")");
@@ -112,9 +112,9 @@ public abstract class Effect extends Streamable {
 				pw.print("(not ");
 				++alignment;
 				align();
-				writeInto(gd);
+				writeInto(pw, gd);
 				align();
-				writeInto(effect);
+				writeInto(pw, effect);
 				--alignment;
 				align();
 				pw.print(")");
@@ -144,9 +144,9 @@ public abstract class Effect extends Streamable {
 				pw.print("(not ");
 				++alignment;
 				align();
-				writeInto(fluent);
+				writeInto(pw, fluent);
 				align();
-				writeInto(expression);
+				writeInto(pw, expression);
 				--alignment;
 				align();
 				pw.print(")");

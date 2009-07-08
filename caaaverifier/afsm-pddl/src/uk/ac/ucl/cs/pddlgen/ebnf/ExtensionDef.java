@@ -25,7 +25,7 @@ public class ExtensionDef extends Streamable {
 		pw.print("(:extends");
 		for (Name n : names) {
 			pw.print(" ");
-			n.printToStream();
+			n.printToStream(pw);
 		}
 		pw.print(")");
 	}

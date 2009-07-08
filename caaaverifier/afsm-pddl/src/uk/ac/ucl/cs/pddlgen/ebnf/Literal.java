@@ -20,13 +20,13 @@ public class Literal<T extends Streamable> extends Streamable {
 	protected void printInternal() {
 		switch(expansion) {
 			case FORMULA:
-				writeInto(formula);
+				writeInto(pw, formula);
 				break;
 			case NOT:
 				pw.print("(not");
 				++alignment;
 				align();
-				writeInto(formula);
+				writeInto(pw, formula);
 				--alignment;
 				align();
 				pw.print(")");

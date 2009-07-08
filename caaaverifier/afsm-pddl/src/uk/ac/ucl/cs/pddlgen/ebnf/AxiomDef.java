@@ -34,18 +34,18 @@ public class AxiomDef extends Streamable {
 	@Override
 	protected void printInternal() {
 		pw.print("(:axiom ");
-		writeInto(gd);
+		writeInto(pw, gd);
 		++alignment;
 		align();
 		pw.print(":vars (");
-		writeInto(vars);
+		writeInto(pw, vars);
 		pw.print(")");
 		align();
 		pw.print(":context ");
-		writeInto(context);
+		writeInto(pw, context);
 		align();
 		pw.print(":implies ");
-		writeInto(implies);
+		writeInto(pw, implies);
 		pw.print(")");
 		--alignment;
 		align();

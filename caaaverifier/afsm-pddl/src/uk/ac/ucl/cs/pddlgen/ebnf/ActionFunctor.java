@@ -23,7 +23,7 @@ public class ActionFunctor extends Streamable {
 	 */
 	@Override
 	protected void printInternal() {
-		writeInto(name);
+		writeInto(pw, name);
 	}
 
 	

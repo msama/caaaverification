@@ -23,7 +23,13 @@ public class StructureDef extends Streamable {
 
 	@Override
 	protected void printInternal() {
-		// TODO Auto-generated method stub
+		if (actionDef != null) {
+			writeInto(pw, actionDef);
+		} else if (axiomDef != null) {
+			writeInto(pw, axiomDef);
+		} else if (methodDef != null) {
+			writeInto(pw, methodDef);
+		}
 	} 
 
 	public static StructureDef create(ActionDef actionDef) {

@@ -21,7 +21,7 @@ public abstract class Term extends Streamable {
 		}
 		Term term = new Term() {
 			protected void printInternal() {
-				writeInto(name);
+				writeInto(pw, name);
 			}
 		};
 		return term;
@@ -33,7 +33,7 @@ public abstract class Term extends Streamable {
 		}
 		Term term = new Term() {
 			protected void printInternal() {
-				writeInto(variable);
+				writeInto(pw, variable);
 			}
 		};
 		return term;

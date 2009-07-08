@@ -20,7 +20,7 @@ public class Predicate extends Streamable {
 	 */
 	@Override
 	protected void printInternal() {
-		writeInto(name);
+		writeInto(pw, name);
 	}
 
 	public static Predicate create(String name) {

@@ -18,7 +18,7 @@ public class ConstantsDef extends Streamable {
 	@Override
 	protected void printInternal() {
 		pw.print("(:constants ");
-		writeInto(typedList);
+		writeInto(pw, typedList);
 		pw.print(")");
 	}
 

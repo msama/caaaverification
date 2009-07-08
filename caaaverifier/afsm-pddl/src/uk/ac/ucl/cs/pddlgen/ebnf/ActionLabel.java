@@ -23,7 +23,7 @@ public class ActionLabel extends Streamable {
 	 */
 	@Override
 	protected void printInternal() {
-		writeInto(name);
+		writeInto(pw, name);
 	}
 
 	public static ActionLabel create(String name) {

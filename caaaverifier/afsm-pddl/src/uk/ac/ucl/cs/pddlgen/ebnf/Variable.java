@@ -21,7 +21,7 @@ public class Variable extends Streamable {
 	@Override
 	protected void printInternal() {
 		pw.print("?");
-		writeInto(name);
+		writeInto(pw, name);
 	}
 
 	public static Variable create(String name) {

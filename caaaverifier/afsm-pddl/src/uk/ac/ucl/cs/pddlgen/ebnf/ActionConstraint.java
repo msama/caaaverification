@@ -26,10 +26,10 @@ public abstract class ActionConstraint extends Streamable {
 			@Override
 			protected void printInternal() {
 				pw.print("(in-context ");
-				writeInto(constraint);
+				writeInto(pw, constraint);
 				++alignment;
 				align();
-				writeInto(body);
+				writeInto(pw, body);
 				--alignment;
 				align();
 				pw.print(")");
@@ -51,7 +51,7 @@ public abstract class ActionConstraint extends Streamable {
 				pw.print("(series ");
 				++alignment;
 				align();
-				writeInto(constraint);
+				writeInto(pw, constraint);
 				--alignment;
 				align();
 				pw.print(")");
@@ -73,7 +73,7 @@ public abstract class ActionConstraint extends Streamable {
 				pw.print("(parallel ");
 				++alignment;
 				align();
-				writeInto(constraint);
+				writeInto(pw, constraint);
 				--alignment;
 				align();
 				pw.print(")");

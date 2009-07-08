@@ -23,9 +23,9 @@ public class AtomicFormulaSkeleton extends Streamable {
 	@Override
 	protected void printInternal() {
 		pw.print("(");
-		writeInto(predicate);
+		writeInto(pw, predicate);
 		pw.print(" ");
-		writeInto(typedList);
+		writeInto(pw, typedList);
 		pw.print(")");
 	}
 

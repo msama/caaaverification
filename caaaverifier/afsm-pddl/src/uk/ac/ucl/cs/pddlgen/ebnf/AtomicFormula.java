@@ -22,9 +22,9 @@ public class AtomicFormula<T extends Streamable> extends Streamable {
 	 */
 	@Override
 	protected void printInternal() {
-		writeInto(predicate);
+		writeInto(pw, predicate);
 		pw.print(" ");
-		writeInto(t);
+		writeInto(pw, t);
 	}
 
 	public static <K extends Streamable> AtomicFormula<K> create(Predicate predicate, K t) {

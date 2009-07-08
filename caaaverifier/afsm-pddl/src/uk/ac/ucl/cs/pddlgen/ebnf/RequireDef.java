@@ -26,7 +26,7 @@ public class RequireDef extends Streamable {
 		pw.print("(:requirements");
 		for (RequireKey k : requireKeys) {
 			pw.print(" ");
-			k.printToStream();
+			k.printToStream(pw);
 		}
 		pw.print(")");
 	}

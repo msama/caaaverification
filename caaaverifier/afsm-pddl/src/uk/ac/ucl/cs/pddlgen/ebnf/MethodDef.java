@@ -20,18 +20,18 @@ public class MethodDef extends Streamable {
 	@Override
 	protected void printInternal() {
 		pw.print("(:method ");
-		writeInto(functor);
+		writeInto(pw, functor);
 		++alignment;
 		align();
 		if (name != null) {
 			pw.print("(:name ");
-			writeInto(name);
+			writeInto(pw, name);
 			align();
 		}
 		pw.print(":parameters (");
-		writeInto(parameters);
+		writeInto(pw, parameters);
 		pw.print(")");
-		writeInto(body);
+		writeInto(pw, body);
 		
 		--alignment;
 		align();
