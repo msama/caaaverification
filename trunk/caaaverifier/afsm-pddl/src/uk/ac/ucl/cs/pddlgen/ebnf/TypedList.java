@@ -21,7 +21,7 @@ public abstract class TypedList<T extends Streamable> extends Streamable {
 		TypedList<T> typedList = new TypedList<T>() {
 			@Override
 			protected void printInternal() {
-				writeInto(names);
+				writeInto(pw, names);
 			}
 		};
 		return typedList;
@@ -31,7 +31,7 @@ public abstract class TypedList<T extends Streamable> extends Streamable {
 		if (names == null) {
 			throw new IllegalArgumentException("Names cannot be null!");
 		}
-		if (names.size() > 0) {
+		if (names.size() < 0) {
 			throw new IllegalArgumentException("Names must contain at least a name!");
 		}
 		if (type == null) {
@@ -44,10 +44,10 @@ public abstract class TypedList<T extends Streamable> extends Streamable {
 		TypedList<T> typedList = new TypedList<T>() {
 			@Override
 			protected void printInternal() {
-				writeInto(names);
+				writeInto(pw, names);
 				pw.print(" - ");
-				writeInto(type);
-				writeIntoIfDefined(tail);
+				writeInto(pw, type);
+				writeIntoIfDefined(tail, pw);
 			}
 		};
 		return typedList;

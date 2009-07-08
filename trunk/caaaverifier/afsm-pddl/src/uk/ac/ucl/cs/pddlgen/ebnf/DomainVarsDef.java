@@ -18,7 +18,7 @@ public class DomainVarsDef extends Streamable {
 	@Override
 	protected void printInternal() {
 		pw.print("(:domain-variables ");
-		writeInto(typedList);
+		writeInto(pw, typedList);
 		pw.print(")");
 	}
 

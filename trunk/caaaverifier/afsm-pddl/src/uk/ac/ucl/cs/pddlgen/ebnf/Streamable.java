@@ -3,6 +3,7 @@
  */
 package uk.ac.ucl.cs.pddlgen.ebnf;
 
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.*;
 
@@ -12,17 +13,19 @@ import java.util.*;
  */
 public abstract class Streamable {
 	
-	protected PrintWriter pw;
-	protected int alignment = 0;
+	protected PrintStream pw;
+	// TODO(rax): this is ugly but will do for now.
+	protected static int alignment = 0;
 	
-	protected final static Set<RequireKey> definedKeys = new HashSet<RequireKey>();
+	public final static Set<RequireKey> definedKeys = new HashSet<RequireKey>();
 	
-	public final void startWriting(PrintWriter pw) {
+	public final void startWriting(PrintStream pw) {
 		this.pw = pw;
-		printToStream();
+		printToStream(pw);
 	}
 	
-	protected final void printToStream() {
+	protected final void printToStream(PrintStream pw) {
+		this.pw = pw;
 		printInternal();
 	}
 	
@@ -36,34 +39,34 @@ public abstract class Streamable {
 		}
 	}
 	
-	protected void writeIntoIfDefined(Streamable st) {
+	protected void writeIntoIfDefined(Streamable st, PrintStream pw) {
 		if (st != null) {
-			st.printToStream();
-			align();
+			st.printToStream(pw);
+			//align();
 		}
 	}
 	
-	protected void writeIntoIfDefined(List<? extends Streamable> elements) {
+	protected void writeIntoIfDefined(List<? extends Streamable> elements, PrintStream pw) {
 		if (elements == null) {
 			throw new IllegalArgumentException(
 					"This element is required and cannot be null!");
 		}
 		for (Streamable st : elements) {
-			writeIntoIfDefined(st);
+			writeIntoIfDefined(st, pw);
 		}
 	}
-	
-	protected void writeInto(Streamable st) {
+	/*
+	protected void writeInto(Streamable st, PrintWriter pw) {
 		if (st == null) {
 			throw new IllegalArgumentException(
 					"This element is required and cannot be null!");
 		}
 		
-		st.printToStream();
+		st.printToStream(pw);
 		align();
 	}
-	
-	protected void writeInto(List<? extends Streamable> elements) {
+	*/
+	protected void writeInto(PrintStream pw, List<? extends Streamable> elements) {
 		if (elements == null) {
 			throw new IllegalArgumentException(
 					"This element is required and cannot be null!");
@@ -73,11 +76,11 @@ public abstract class Streamable {
 				"At least one element of this type must be defined!");
 		}
 		for (Streamable st : elements) {
-			writeInto(st);
+			writeInto(pw, st);
 		}
 	}
 	
-	protected void writeInto(Streamable... elements) {
+	protected void writeInto(PrintStream pw, Streamable... elements) {
 		if (elements == null) {
 			throw new IllegalArgumentException(
 					"This element is required and cannot be null!");
@@ -87,7 +90,9 @@ public abstract class Streamable {
 				"At least one element of this type must be defined!");
 		}
 		for (Streamable st : elements) {
-			writeInto(st);
+			st.printToStream(pw);
+			pw.print(' ');
+			//align();
 		}
 	}
 }

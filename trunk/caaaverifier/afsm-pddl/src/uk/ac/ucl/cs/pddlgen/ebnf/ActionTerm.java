@@ -26,8 +26,8 @@ public class ActionTerm extends Streamable {
 	 */
 	@Override
 	protected void printInternal() {
-		writeInto(functor);
-		writeInto(terms);
+		writeInto(pw, functor);
+		writeInto(pw, terms);
 	}
 
 	public static ActionTerm create(

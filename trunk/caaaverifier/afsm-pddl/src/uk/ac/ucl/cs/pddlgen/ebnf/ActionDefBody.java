@@ -41,14 +41,14 @@ public class ActionDefBody extends Streamable {
 	protected void printInternal() {
 		if (variables != null) {
 			pw.print(":vars (");
-			writeInto(variables);
+			writeInto(pw, variables);
 			pw.print("");
 			align();
 		}
 		
 		if (preconditions != null) {
 			pw.print(":preconditions ");
-			writeInto(preconditions);
+			writeInto(pw, preconditions);
 			align();
 		}
 		
@@ -59,19 +59,19 @@ public class ActionDefBody extends Streamable {
 		
 		if (maintain != null) {
 			pw.print(":maintain ");
-			writeInto(maintain);
+			writeInto(pw, maintain);
 			align();
 		}
 		
 		if (effect != null) {
 			pw.print(":effect ");
-			writeInto(effect);
+			writeInto(pw, effect);
 			align();
 		}
 		
 		if (onlyInExpansion != null) {
 			pw.print(":only-in-expansion ");
-			writeInto(onlyInExpansion);
+			writeInto(pw, onlyInExpansion);
 			align();
 		}
 	}

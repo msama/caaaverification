@@ -30,15 +30,15 @@ public class ActionLabelTerm extends Streamable {
 	 */
 	@Override
 	protected void printInternal() {
-		writeInto(label);
+		writeInto(pw, label);
 		++alignment;
 		align();
 		pw.print("| (< ");
-		writeInto(lesser);
-		pw.write(")");
+		writeInto(pw, lesser);
+		pw.print(")");
 		pw.print("| (> ");
-		writeInto(greater);
-		pw.write(")");
+		writeInto(pw, greater);
+		pw.print(")");
 		--alignment;
 		align();
 	}

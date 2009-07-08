@@ -32,16 +32,16 @@ public class ActionDef extends Streamable {
 	@Override
 	protected void printInternal() {
 		pw.print("(:action ");
-		writeInto(actionFunctor);
+		writeInto(pw, actionFunctor);
 		++ alignment;
 		align();
 		
 		pw.print(":parameters ( ");
-		writeInto(variables);
+		writeInto(pw, variables);
 		pw.print(" )");
 		align();
 		
-		writeInto(actionDefBody);
+		writeInto(pw, actionDefBody);
 		
 		-- alignment;
 		align();

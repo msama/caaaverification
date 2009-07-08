@@ -44,34 +44,42 @@ public class Domain extends Streamable {
 	@Override
 	public void printInternal() {
 		pw.print("(define (domain ");
-		writeInto(name);
+		writeInto(pw, name);
 		pw.print(")");
 		++ alignment;
 		align();
 		
-		writeIntoIfDefined(extensionDef);
+		writeIntoIfDefined(extensionDef, pw);
+		align();
 		
-		writeIntoIfDefined(requireDef);
+		writeIntoIfDefined(requireDef, pw);
+		align();
 		
 		if (requireDef.requireKeys.contains(RequireKey.TYPING)) {
-			writeIntoIfDefined(typesDef);
+			writeIntoIfDefined(typesDef, pw);
+			align();
 		}
 		
-		writeIntoIfDefined(constantsDef);
+		writeIntoIfDefined(constantsDef, pw);
 		
 		if (requireDef.requireKeys.contains(RequireKey.EXPRESSION_EVALUATION)) {
-			writeIntoIfDefined(domainsVarDef);
+			writeIntoIfDefined(domainsVarDef, pw);
+			align();
 		}
 		
-		writeIntoIfDefined(predicatesDef);
+		writeIntoIfDefined(predicatesDef, pw);
+		align();
 		
-		writeIntoIfDefined(timelessDef);
+		writeIntoIfDefined(timelessDef, pw);
+		align();
 		
 		if (requireDef.requireKeys.contains(RequireKey.SAFETY_CONSTRAINTS)) {
-			writeIntoIfDefined(safetyDef);
+			writeIntoIfDefined(safetyDef, pw);
+			align();
 		}
 		
-		writeIntoIfDefined(structureDefs);
+		writeIntoIfDefined(structureDefs, pw);
+		align();
 		
 		-- alignment;
 		align();

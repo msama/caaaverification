@@ -19,7 +19,7 @@ public abstract class Type extends Streamable {
 		}
 		Type t = new Type() {
 			protected void printInternal() {
-				writeInto(name);
+				writeInto(pw, name);
 			}
 		};
 		return t;
@@ -32,7 +32,7 @@ public abstract class Type extends Streamable {
 		Type t = new Type() {
 			protected void printInternal() {
 				pw.print("(either ");
-				writeInto(either);
+				writeInto(pw, either);
 				pw.print(")");
 			}
 		};
@@ -51,7 +51,7 @@ public abstract class Type extends Streamable {
 		Type t = new Type() {
 			protected void printInternal() {
 				pw.print("(fluent ");
-				writeInto(fluent);
+				writeInto(pw, fluent);
 				pw.print(")");
 			}
 		};

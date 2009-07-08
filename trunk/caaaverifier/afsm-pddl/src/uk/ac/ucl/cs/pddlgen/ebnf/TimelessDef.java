@@ -26,7 +26,7 @@ public class TimelessDef extends Streamable {
 		pw.print("(:timeless ");
 		for (Literal<Name> l : literals) {
 			pw.print(" ");
-			l.printToStream();
+			l.printToStream(pw);
 		}
 		pw.print(")");
 	}

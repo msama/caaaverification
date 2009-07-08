@@ -21,7 +21,7 @@ public class SafetyDef extends Streamable {
 	@Override
 	protected void printInternal() {
 		pw.print("(:safety ");
-		writeInto(gd);
+		writeInto(pw, gd);
 		pw.print(")");
 		align();
 	}

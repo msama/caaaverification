@@ -57,25 +57,25 @@ public class GD extends Streamable {
 	protected void printInternal() {
 		switch(expansion) {
 			case FORMULA:
-				writeInto(formula);
+				writeInto(pw, formula);
 				break;
 			case AND:
 				pw.print("(and ");
 				++alignment;
 				align();
-				writeInto(and);
+				writeInto(pw, and);
 				--alignment;
 				align();
 				pw.print(")");
 				break;
 			case LITERAL:
-				writeInto(literal);
+				writeInto(pw, literal);
 				break;
 			case OR:
 				pw.print("(or ");
 				++alignment;
 				align();
-				writeInto(or);
+				writeInto(pw, or);
 				--alignment;
 				align();
 				pw.print(")");
@@ -84,7 +84,7 @@ public class GD extends Streamable {
 				pw.print("(not ");
 				++alignment;
 				align();
-				writeInto(not);
+				writeInto(pw, not);
 				--alignment;
 				align();
 				pw.print(")");
@@ -93,9 +93,9 @@ public class GD extends Streamable {
 				pw.print("(imply ");
 				++alignment;
 				align();
-				writeInto(implyPrecondition);
+				writeInto(pw, implyPrecondition);
 				align();
-				writeInto(implyEffect);
+				writeInto(pw, implyEffect);
 				--alignment;
 				align();
 				pw.print(")");
@@ -104,9 +104,9 @@ public class GD extends Streamable {
 				pw.print("(exist ");
 				++alignment;
 				align();
-				writeInto(existList);
+				writeInto(pw, existList);
 				align();
-				writeInto(existEffect);
+				writeInto(pw, existEffect);
 				--alignment;
 				align();
 				pw.print(")");
@@ -115,9 +115,9 @@ public class GD extends Streamable {
 				pw.print("(forall ");
 				++alignment;
 				align();
-				writeInto(forallList);
+				writeInto(pw, forallList);
 				align();
-				writeInto(forallEffect);
+				writeInto(pw, forallEffect);
 				--alignment;
 				align();
 				pw.print(")");

@@ -20,7 +20,7 @@ public class ExtraDef extends Streamable {
 
 	@Override
 	protected void printInternal() {
-		writeInto(streamable);
+		writeInto(pw, streamable);
 	}
 	
 	public static ExtraDef create(final ActionDef action) {

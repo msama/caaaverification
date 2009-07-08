@@ -17,7 +17,7 @@ public abstract class ActionSpec extends Streamable {
 		}
 		ActionSpec actionSpec = new ActionSpec() {
 			protected void printInternal() {
-				writeInto(actionTerm);
+				writeInto(pw, actionTerm);
 			}
 		};
 		return actionSpec;
@@ -36,9 +36,9 @@ public abstract class ActionSpec extends Streamable {
 				pw.print("(in-context");
 				++alignment;
 				align();
-				writeInto(action);
+				writeInto(pw, action);
 				align();
-				writeInto(body);
+				writeInto(pw, body);
 				--alignment;
 				align();
 				pw.print(")");
@@ -57,7 +57,7 @@ public abstract class ActionSpec extends Streamable {
 				pw.print("(choice");
 				++alignment;
 				align();
-				writeInto(actions);
+				writeInto(pw, actions);
 				--alignment;
 				align();
 				pw.print(")");
@@ -80,10 +80,10 @@ public abstract class ActionSpec extends Streamable {
 				++alignment;
 				align();
 				pw.print("(");
-				writeInto(vars);
+				writeInto(pw, vars);
 				pw.print(")");
 				align();
-				writeInto(action);
+				writeInto(pw, action);
 				--alignment;
 				align();
 				pw.print(")");
@@ -102,7 +102,7 @@ public abstract class ActionSpec extends Streamable {
 				pw.print("(series");
 				++alignment;
 				align();
-				writeInto(actions);
+				writeInto(pw, actions);
 				--alignment;
 				align();
 				pw.print(")");
@@ -121,7 +121,7 @@ public abstract class ActionSpec extends Streamable {
 				pw.print("(parallel");
 				++alignment;
 				align();
-				writeInto(actions);
+				writeInto(pw, actions);
 				--alignment;
 				align();
 				pw.print(")");
@@ -146,11 +146,11 @@ public abstract class ActionSpec extends Streamable {
 				pw.print("(tag");
 				++alignment;
 				align();
-				writeInto(labels1);
+				writeInto(pw, labels1);
 				align();
-				writeInto(term);
+				writeInto(pw, term);
 				align();
-				writeInto(labels2);
+				writeInto(pw, labels2);
 				--alignment;
 				align();
 				pw.print(")");
@@ -179,11 +179,11 @@ public abstract class ActionSpec extends Streamable {
 				pw.print("(foreach");
 				++alignment;
 				align();
-				writeInto(var);
+				writeInto(pw, var);
 				align();
-				writeInto(gd);
+				writeInto(pw, gd);
 				align();
-				writeInto(spec);
+				writeInto(pw, spec);
 				--alignment;
 				align();
 				pw.print(")");
@@ -209,9 +209,9 @@ public abstract class ActionSpec extends Streamable {
 				pw.print("(constrained");
 				++alignment;
 				align();
-				writeInto(specs);
+				writeInto(pw, specs);
 				align();
-				writeInto(constraints);
+				writeInto(pw, constraints);
 				--alignment;
 				align();
 				pw.print(")");
