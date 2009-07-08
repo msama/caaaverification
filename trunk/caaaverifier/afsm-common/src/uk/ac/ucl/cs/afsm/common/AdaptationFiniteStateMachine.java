@@ -5,7 +5,9 @@ package uk.ac.ucl.cs.afsm.common;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import uk.ac.ucl.cs.afsm.common.predicate.Predicate;
 import uk.ac.ucl.cs.afsm.common.predicate.Variable;
@@ -22,6 +24,8 @@ public class AdaptationFiniteStateMachine {
 		super();
 		this.name = name;
 	}
+	
+	public final Set<Context> contexts = new HashSet<Context>();
 
 	/**
 	 * States defined in the {@link AdaptationFiniteStateMachine}.
@@ -48,6 +52,12 @@ public class AdaptationFiniteStateMachine {
 	private State initialState;
 
 	private final String name;
+	
+	public Context context(String name) {
+		Context c = new Context(name);
+		contexts.add(c);
+		return c;
+	}
 	
 	public Variable variable(String name, Context context) {
 		if (variables.containsKey(name)) {
