@@ -11,6 +11,18 @@ public abstract class Effect extends Streamable {
 
 	private Effect() {}
 	
+	private void writeEffect(Effect[] effects) {
+		++alignment;
+		for (Effect eff : effects) {
+			align();
+			pw.print("(");
+			writeInto(pw, eff);
+			pw.print(")");
+		}
+		--alignment;
+		align();
+	}
+	
 	public static Effect createAnd(final Effect... and) {
 		if (and.length == 0) {
 			throw new IllegalArgumentException(
@@ -19,7 +31,7 @@ public abstract class Effect extends Streamable {
 		
 		Effect effect = new Effect(){ 
 			protected void printInternal() {
-				writeInto(pw, and);
+				super.writeEffect(and);
 			}
 		};
 		return effect;

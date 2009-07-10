@@ -61,11 +61,7 @@ public class GD extends Streamable {
 				break;
 			case AND:
 				pw.print("(and ");
-				++alignment;
-				align();
-				writeInto(pw, and);
-				--alignment;
-				align();
+				writeList(and);
 				pw.print(")");
 				break;
 			case LITERAL:
@@ -73,31 +69,19 @@ public class GD extends Streamable {
 				break;
 			case OR:
 				pw.print("(or ");
-				++alignment;
-				align();
-				writeInto(pw, or);
-				--alignment;
-				align();
+				writeList(or);
 				pw.print(")");
 				break;
 			case NOT:
 				pw.print("(not ");
-				++alignment;
-				align();
-				writeInto(pw, not);
-				--alignment;
-				align();
+				writeGD(not);
 				pw.print(")");
 				break;
 			case IMPLY:
 				pw.print("(imply ");
 				++alignment;
-				align();
-				writeInto(pw, implyPrecondition);
-				align();
-				writeInto(pw, implyEffect);
-				--alignment;
-				align();
+				writeGD(implyPrecondition);
+				writeGD(implyEffect);
 				pw.print(")");
 				break;
 			case EXISTS:
@@ -116,15 +100,35 @@ public class GD extends Streamable {
 				++alignment;
 				align();
 				writeInto(pw, forallList);
-				align();
-				writeInto(pw, forallEffect);
 				--alignment;
-				align();
+				writeGD(forallEffect);
 				pw.print(")");
 				break;
 		}
 	}
 
+	private void writeList(List<GD> list) {
+		++alignment;
+		for (GD gd : list) {
+			align();
+			pw.print("(");
+			writeInto(pw, gd);
+			pw.print(")");
+		}
+		--alignment;
+		align();
+	}
+	
+	private void writeGD(GD gd) {
+		++alignment;
+		align();
+		//pw.print("(");
+		writeInto(pw, gd);
+		//pw.print(")");
+		--alignment;
+		align();
+	}
+	
 	private enum Expansion {
 		FORMULA,
 		AND,
