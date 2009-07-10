@@ -28,9 +28,9 @@ public class PhoneAdapterAfsm implements AfsmBuilder {
 		AdaptationFiniteStateMachine afsm = new AdaptationFiniteStateMachine("PhoneAdapter");
 		
 		// Contexts
-		Context time = new Context("Time");
-		Context bt = new Context("Bluetooth");
-		Context gps = new Context("GPS");
+		Context time = afsm.context("Time");
+		Context bt = afsm.context("Bluetooth");
+		Context gps = afsm.context("GPS");
 		
 		Variable varGpsA = afsm.variable("A_gps", gps); //GPS.isValid();
 		Variable varGpsB = afsm.variable("B_gps", gps); //GPS_home
