@@ -214,18 +214,29 @@ public class AfsmParser {
 		
 		List<StructureDef> defs = new ArrayList<StructureDef>();
 		
-		//ActionDef actionDef = ActionDef.create();
-		//StructureDef.create(methodDef);
+		//Type t = null;
+		//Variable var = null;
+		//List<Variable> vars = new ArrayList<Variable>();
+		//TypedList<Variable> typedList = null;
+		
+		// Add an action for each Rule
 		for (Rule rule : afsm.rules) {
+			TypedList<Variable> typedList = null;
 			ActionFunctor functor = new ActionFunctor(Name.create("rule_" + rule.getName()));
 			
-			List<Variable> varName = new ArrayList<Variable>();
 			for (uk.ac.ucl.cs.afsm.common.predicate.Variable v : rule.getAllVariables()) {
-				varName.add(Variable.create(v.getName()));
+				Type t = Type.create(names.get(v.getName()));
+				List<Variable> vars = new ArrayList<Variable>();
+				vars.add(Variable.create(v.getName()));
+				typedList = TypedList.create(vars, t, typedList);
 			}
 			// Add state as a variable
-			varName.add(Variable.create("state"));
-			TypedList<Variable> vars = TypedList.create(varName);
+			{
+				Type t = Type.create(names.get("state"));
+				List<Variable> vars = new ArrayList<Variable>();
+				vars.add(Variable.create("state"));
+				typedList = TypedList.create(vars, t, typedList);
+			}
 			
 			GD preconditions = parsePredicate(rule.getTrigger());
 			
@@ -238,8 +249,8 @@ public class AfsmParser {
 				// predicate must be one satisfying the variable
 				Predicate predicate = predicates.get("is-true-" + a.getVariable().getName());
 				// the term is the name of the local variable
-				Term t = Term.create(names.get(a.getVariable().getName()));
-				AtomicFormula<Term> formula = AtomicFormula.create(predicate, t);
+				Term term = Term.create(names.get(a.getVariable().getName()));
+				AtomicFormula<Term> formula = AtomicFormula.create(predicate, term);
 				if (a instanceof Assignment.Satisfy) {
 					eff = Effect.createFormula(formula);
 				} else {
@@ -252,7 +263,7 @@ public class AfsmParser {
 			// predicate must be one satisfying the variable
 			Predicate predicate = predicates.get("is-state-" + rule.getDestination().getName());
 			// the term is the name of the local variable
-			Term t = Term.create(names.get("state"));
+			Term t = Term.create(Variable.create(names.get("state")));
 			AtomicFormula<Term> formula = AtomicFormula.create(predicate, t);	
 			and[i] = Effect.createFormula(formula);
 			Effect effect = Effect.createAnd(and);
@@ -260,11 +271,12 @@ public class AfsmParser {
 			
 			
 			ActionDefBody body = ActionDefBody.create(preconditions, effect);
-			ActionDef actionDef = ActionDef.create(functor, vars, body);
+			ActionDef actionDef = ActionDef.create(functor, typedList, body);
 			StructureDef struct = StructureDef.create(actionDef);
 			defs.add(struct);
 		}
 		
+		// Add events to satisfy/unsatisfy each variables
 		
 		return defs;
 	}
@@ -276,7 +288,7 @@ public class AfsmParser {
 			throw new IllegalStateException("False not defined: " + predicate);
 		} if (predicate instanceof uk.ac.ucl.cs.afsm.common.predicate.Variable) {
 			uk.ac.ucl.cs.afsm.common.predicate.Variable v = (uk.ac.ucl.cs.afsm.common.predicate.Variable)predicate;
-			Term t = Term.create(names.get(v.getName()));
+			Term t = Term.create(Variable.create(names.get(v.getName())));
 			AtomicFormula<Term> formula = AtomicFormula.create(predicates.get("is-true-" + v.getName()), t);
 			return GD.createFormula(formula);
 		} else if (predicate instanceof Operator.Not) {
