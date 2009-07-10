@@ -61,7 +61,7 @@ public class GD extends Streamable {
 				break;
 			case AND:
 				pw.print("(and ");
-				writeList(and);
+				writeAlignedList(and);
 				pw.print(")");
 				break;
 			case LITERAL:
@@ -69,7 +69,7 @@ public class GD extends Streamable {
 				break;
 			case OR:
 				pw.print("(or ");
-				writeList(or);
+				writeAlignedList(or);
 				pw.print(")");
 				break;
 			case NOT:
@@ -86,10 +86,7 @@ public class GD extends Streamable {
 				break;
 			case EXISTS:
 				pw.print("(exist ");
-				++alignment;
-				align();
-				writeInto(pw, existList);
-				align();
+				writeAlignedList(existList);
 				writeInto(pw, existEffect);
 				--alignment;
 				align();
@@ -97,26 +94,11 @@ public class GD extends Streamable {
 				break;
 			case FORALL:
 				pw.print("(forall ");
-				++alignment;
-				align();
-				writeInto(pw, forallList);
-				--alignment;
+				writeAlignedList(forallList);
 				writeGD(forallEffect);
 				pw.print(")");
 				break;
 		}
-	}
-
-	private void writeList(List<GD> list) {
-		++alignment;
-		for (GD gd : list) {
-			align();
-			pw.print("(");
-			writeInto(pw, gd);
-			pw.print(")");
-		}
-		--alignment;
-		align();
 	}
 	
 	private void writeGD(GD gd) {

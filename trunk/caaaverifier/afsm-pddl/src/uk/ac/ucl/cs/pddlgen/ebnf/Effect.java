@@ -3,6 +3,10 @@
  */
 package uk.ac.ucl.cs.pddlgen.ebnf;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * @author rax
  *
@@ -20,7 +24,7 @@ public abstract class Effect extends Streamable {
 			pw.print(")");
 		}
 		--alignment;
-		align();
+		//align();
 	}
 	
 	public static Effect createAnd(final Effect... and) {
@@ -92,7 +96,7 @@ public abstract class Effect extends Streamable {
 				pw.print("(not ");
 				++alignment;
 				align();
-				writeInto(pw, vars);
+				writeSpaceSeparatedList(vars);
 				align();
 				writeInto(pw, effect);
 				--alignment;

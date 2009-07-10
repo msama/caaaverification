@@ -57,7 +57,7 @@ public abstract class ActionSpec extends Streamable {
 				pw.print("(choice");
 				++alignment;
 				align();
-				writeInto(pw, actions);
+				writeSpaceSeparatedList(actions);
 				--alignment;
 				align();
 				pw.print(")");
@@ -80,7 +80,7 @@ public abstract class ActionSpec extends Streamable {
 				++alignment;
 				align();
 				pw.print("(");
-				writeInto(pw, vars);
+				writeSpaceSeparatedList(vars);
 				pw.print(")");
 				align();
 				writeInto(pw, action);
@@ -102,7 +102,7 @@ public abstract class ActionSpec extends Streamable {
 				pw.print("(series");
 				++alignment;
 				align();
-				writeInto(pw, actions);
+				writeSpaceSeparatedList(actions);
 				--alignment;
 				align();
 				pw.print(")");
@@ -121,7 +121,7 @@ public abstract class ActionSpec extends Streamable {
 				pw.print("(parallel");
 				++alignment;
 				align();
-				writeInto(pw, actions);
+				writeSpaceSeparatedList(actions);
 				--alignment;
 				align();
 				pw.print(")");
@@ -130,7 +130,7 @@ public abstract class ActionSpec extends Streamable {
 		return actionSpec;
 	}
 	
-	public static ActionSpec createParallel(final ActionLabelTerm[] labels1, final ActionTerm term, final ActionLabelTerm[] labels2) {
+	public static ActionSpec createTag(final ActionLabelTerm[] labels1, final ActionTerm term, final ActionLabelTerm[] labels2) {
 		if (labels1 == null || labels1.length == 0) {
 			throw new IllegalArgumentException("Statement <action spec> must define <action label>.");
 		}
@@ -146,11 +146,11 @@ public abstract class ActionSpec extends Streamable {
 				pw.print("(tag");
 				++alignment;
 				align();
-				writeInto(pw, labels1);
+				writeSpaceSeparatedList(labels1);
 				align();
-				writeInto(pw, term);
+				writeSpaceSeparatedList(term);
 				align();
-				writeInto(pw, labels2);
+				writeSpaceSeparatedList(labels2);
 				--alignment;
 				align();
 				pw.print(")");
@@ -209,9 +209,9 @@ public abstract class ActionSpec extends Streamable {
 				pw.print("(constrained");
 				++alignment;
 				align();
-				writeInto(pw, specs);
+				writeSpaceSeparatedList(specs);
 				align();
-				writeInto(pw, constraints);
+				writeSpaceSeparatedList(constraints);
 				--alignment;
 				align();
 				pw.print(")");

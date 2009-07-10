@@ -55,17 +55,18 @@ public abstract class Streamable {
 			writeIntoIfDefined(st, pw);
 		}
 	}
-	/*
-	protected void writeInto(Streamable st, PrintWriter pw) {
+	
+	protected void writeInto(PrintStream pw, Streamable st) {
 		if (st == null) {
 			throw new IllegalArgumentException(
 					"This element is required and cannot be null!");
 		}
 		
 		st.printToStream(pw);
-		align();
+		//align();
 	}
-	*/
+
+	/*
 	protected void writeInto(PrintStream pw, List<? extends Streamable> elements) {
 		if (elements == null) {
 			throw new IllegalArgumentException(
@@ -78,8 +79,9 @@ public abstract class Streamable {
 		for (Streamable st : elements) {
 			writeInto(pw, st);
 		}
-	}
+	}*/
 	
+	/*
 	protected void writeInto(PrintStream pw, Streamable... elements) {
 		if (elements == null) {
 			throw new IllegalArgumentException(
@@ -94,5 +96,37 @@ public abstract class Streamable {
 			pw.print(' ');
 			//align();
 		}
+	}*/
+	
+	protected <T extends Streamable> void writeSpaceSeparatedList(final List<T> list) {
+		int i = 0;
+		for (T s : list) {
+			writeInto(pw, s);
+			if (++i < list.size()) {
+				pw.print(" ");
+			}
+		}
+	}
+	
+	protected <T extends Streamable> void writeSpaceSeparatedList(final T... list) {
+		int i = 0;
+		for (T s : list) {
+			writeInto(pw, s);
+			if (++i < list.length) {
+				pw.print(" ");
+			}
+		}
+	}
+	
+	protected <K extends Streamable> void writeAlignedList(List<K> list) {
+		++alignment;
+		for (K s : list) {
+			align();
+			//pw.print("(");
+			writeInto(pw, s);
+			//pw.print(")");
+		}
+		--alignment;
+		align();
 	}
 }

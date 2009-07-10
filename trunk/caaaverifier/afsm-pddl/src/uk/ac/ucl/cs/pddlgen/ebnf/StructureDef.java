@@ -30,6 +30,7 @@ public class StructureDef extends Streamable {
 		} else if (methodDef != null) {
 			writeInto(pw, methodDef);
 		}
+		align();
 	} 
 
 	public static StructureDef create(ActionDef actionDef) {

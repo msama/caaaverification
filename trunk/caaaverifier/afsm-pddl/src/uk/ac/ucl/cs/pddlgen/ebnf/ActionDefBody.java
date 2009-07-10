@@ -40,39 +40,42 @@ public class ActionDefBody extends Streamable {
 	@Override
 	protected void printInternal() {
 		if (variables != null) {
+			align();
 			pw.print(":vars (");
 			writeInto(pw, variables);
-			pw.print("");
-			align();
+			pw.print(")");
 		}
 		
 		if (preconditions != null) {
-			pw.print(":preconditions ");
-			writeInto(pw, preconditions);
 			align();
+			pw.print(":preconditions ");
+			++alignment;
+			align();
+			writeInto(pw, preconditions);
+			--alignment;
 		}
 		
 		if (expansionMethod) {
-			pw.print(":expansion :methods");
 			align();
+			pw.print(":expansion :methods");
 		}
 		
 		if (maintain != null) {
+			align();
 			pw.print(":maintain ");
 			writeInto(pw, maintain);
-			align();
 		}
 		
 		if (effect != null) {
+			align();
 			pw.print(":effect ");
 			writeInto(pw, effect);
-			align();
 		}
 		
 		if (onlyInExpansion != null) {
+			align();
 			pw.print(":only-in-expansion ");
 			writeInto(pw, onlyInExpansion);
-			align();
 		}
 	}
 

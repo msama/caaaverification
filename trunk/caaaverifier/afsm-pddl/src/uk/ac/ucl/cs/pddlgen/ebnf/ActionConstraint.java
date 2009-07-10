@@ -51,7 +51,7 @@ public abstract class ActionConstraint extends Streamable {
 				pw.print("(series ");
 				++alignment;
 				align();
-				writeInto(pw, constraint);
+				writeSpaceSeparatedList(constraint);
 				--alignment;
 				align();
 				pw.print(")");
@@ -73,7 +73,7 @@ public abstract class ActionConstraint extends Streamable {
 				pw.print("(parallel ");
 				++alignment;
 				align();
-				writeInto(pw, constraint);
+				writeSpaceSeparatedList(constraint);
 				--alignment;
 				align();
 				pw.print(")");
