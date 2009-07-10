@@ -11,23 +11,24 @@ import java.util.List;
  */
 public abstract class TypedList<T extends Streamable> extends Streamable {
 	
-	public static<T extends Streamable> TypedList<T> create(final List<T> names) {
+	public static<K extends Streamable> TypedList<K> create(final List<K> names) {
 		if (names == null) {
 			throw new IllegalArgumentException("Names cannot be null!");
 		}
 		if (names.size() < 1) {
 			throw new IllegalArgumentException("Names must contain at least a name!");
 		}
-		TypedList<T> typedList = new TypedList<T>() {
+		TypedList<K> typedList = new TypedList<K>() {
 			@Override
 			protected void printInternal() {
-				writeInto(pw, names);
+				super.writeSpaceSeparatedList(names);
 			}
 		};
 		return typedList;
 	}
 	
-	public static<T extends Streamable> TypedList<T> create(final List<T> names, final Type type, final TypedList<T> tail) {
+	public static<K extends Streamable> TypedList<K> create(final List<K> names, 
+			final Type type, final TypedList<K> tail) {
 		if (names == null) {
 			throw new IllegalArgumentException("Names cannot be null!");
 		}
@@ -41,10 +42,10 @@ public abstract class TypedList<T extends Streamable> extends Streamable {
 			throw new IllegalStateException(
 			"Statement <type> requires <require-key> :typing.");
 		}
-		TypedList<T> typedList = new TypedList<T>() {
+		TypedList<K> typedList = new TypedList<K>() {
 			@Override
 			protected void printInternal() {
-				writeInto(pw, names);
+				super.writeSpaceSeparatedList(names);
 				pw.print(" - ");
 				writeInto(pw, type);
 				writeIntoIfDefined(tail, pw);
@@ -52,4 +53,5 @@ public abstract class TypedList<T extends Streamable> extends Streamable {
 		};
 		return typedList;
 	}
+	
 }

@@ -32,7 +32,7 @@ public abstract class Type extends Streamable {
 		Type t = new Type() {
 			protected void printInternal() {
 				pw.print("(either ");
-				writeInto(pw, either);
+				super.writeSpaceSeparatedList(either);
 				pw.print(")");
 			}
 		};
@@ -57,4 +57,5 @@ public abstract class Type extends Streamable {
 		};
 		return t;
 	}
+	
 }
