@@ -55,7 +55,7 @@ public class AfsmParser {
 	private static final Name CONTEXT_NAME = Name.create(CONTEXT);
 	
 	private static final Variable STATE_VARIABLE = Variable.create("s");
-	private static final Variable CONTEXT_VARIABLE = Variable.create("v");
+	private static final Variable CONTEXT_VARIABLE = Variable.create("c");
 	
 	private static final Type STATE_TYPE = Type.create(STATE_NAME);
 	private static final Type CONTEXT_TYPE = Type.create(CONTEXT_NAME);
@@ -275,6 +275,39 @@ public class AfsmParser {
 		}
 		
 		// Add events to satisfy/unsatisfy each variables
+		for (String key : afsm.variables.keySet()) {
+			uk.ac.ucl.cs.afsm.common.predicate.Variable v = afsm.variables.get(key);
+			
+			ActionFunctor satisfy = new ActionFunctor(Name.create("satisfy_" + v.getName()));
+			ActionFunctor unsatisfy = new ActionFunctor(Name.create("unsatisfy_" + v.getName()));
+			
+			TypedList<Variable> typedList = null;
+			// Add vontext
+			List<Variable> vars = new ArrayList<Variable>();
+			vars.add(CONTEXT_VARIABLE);
+			typedList = TypedList.create(vars, CONTEXT_TYPE, typedList);
+			
+			Term t = Term.create(CONTEXT_VARIABLE);
+			AtomicFormula<Term> formula = AtomicFormula.create(predicates.get(v.getName()), t);
+			
+			GD preconditions_positive = GD.createFormula(formula);
+			GD preconditions_negative = GD.createNot(GD.createFormula(formula));
+			//TODO(rax): add constraints here
+			
+			Effect effect_positive = Effect.createFormula(formula);
+			Effect effect_negative = Effect.createNot(formula);
+			
+			ActionDefBody body_satisfy = ActionDefBody.create(preconditions_negative, effect_positive);
+			ActionDefBody body_unsatisfy = ActionDefBody.create(preconditions_positive, effect_negative);
+			
+			ActionDef actionDef = ActionDef.create(satisfy, typedList, body_satisfy);
+			StructureDef struct = StructureDef.create(actionDef);
+			defs.add(struct);
+			
+			actionDef = ActionDef.create(unsatisfy, typedList, body_unsatisfy);
+			struct = StructureDef.create(actionDef);
+			defs.add(struct);
+		}
 		
 		return defs;
 	}
