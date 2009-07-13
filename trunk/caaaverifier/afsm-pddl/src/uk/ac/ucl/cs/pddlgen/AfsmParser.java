@@ -14,6 +14,7 @@ import uk.ac.ucl.cs.afsm.common.Assignment;
 import uk.ac.ucl.cs.afsm.common.Rule;
 import uk.ac.ucl.cs.afsm.common.State;
 import uk.ac.ucl.cs.afsm.common.predicate.Constant;
+import uk.ac.ucl.cs.afsm.common.predicate.Constrain;
 import uk.ac.ucl.cs.afsm.common.predicate.Operator;
 import uk.ac.ucl.cs.pddlgen.ebnf.ActionDef;
 import uk.ac.ucl.cs.pddlgen.ebnf.ActionDefBody;
@@ -287,18 +288,80 @@ public class AfsmParser {
 			vars.add(CONTEXT_VARIABLE);
 			typedList = TypedList.create(vars, CONTEXT_TYPE, typedList);
 			
+			
+			List<GD> satisfyPrec = new ArrayList<GD>();
+			List<GD> unsatisfyPrec = new ArrayList<GD>();
+			
+			for (Constrain con : afsm.constrains) {
+				uk.ac.ucl.cs.afsm.common.predicate.Predicate requiree = con.requiree;
+				if (requiree.equals(v)) {
+					satisfyPrec.add(parsePredicate(con.required));
+				} else if (requiree instanceof Operator.Not) {
+					requiree = ((Operator.Not)requiree).getPredicate();
+					if (requiree.equals(v)) {
+						unsatisfyPrec.add(parsePredicate(con.required));
+					}
+				}
+			}
+			
 			Term t = Term.create(CONTEXT_VARIABLE);
-			AtomicFormula<Term> formula = AtomicFormula.create(predicates.get(v.getName()), t);
+			GD satisfyPreconditions = null;
+			GD unsatisfyPreconditions = null;
+			if (satisfyPrec.size() > 0) {
+				satisfyPreconditions = GD.createOr(satisfyPrec.toArray(new GD[satisfyPrec.size()]));
+				satisfyPreconditions = GD.createAnd(satisfyPreconditions, GD.createNot(parsePredicate(v)));
+			} else {
+				satisfyPreconditions = GD.createNot(parsePredicate(v));
+			}
 			
-			GD preconditions_positive = GD.createFormula(formula);
-			GD preconditions_negative = GD.createNot(GD.createFormula(formula));
-			//TODO(rax): add constraints here
+			if (unsatisfyPrec.size() > 0) {
+				unsatisfyPreconditions = GD.createOr(unsatisfyPrec.toArray(new GD[unsatisfyPrec.size()]));
+				unsatisfyPreconditions = GD.createAnd(unsatisfyPreconditions, parsePredicate(v));
+			} else {
+				unsatisfyPreconditions =  parsePredicate(v);
+			}
 			
-			Effect effect_positive = Effect.createFormula(formula);
-			Effect effect_negative = Effect.createNot(formula);
+			// Add AND with the variable negated
 			
-			ActionDefBody body_satisfy = ActionDefBody.create(preconditions_negative, effect_positive);
-			ActionDefBody body_unsatisfy = ActionDefBody.create(preconditions_positive, effect_negative);
+			
+			
+			//Effect effect_positive = Effect.createFormula(formula);
+			//Effect effect_negative = Effect.createFormula(formula);
+			List<Effect> satisfyEff = new ArrayList<Effect>();
+			List<Effect> unsatisfyEff = new ArrayList<Effect>();
+			
+			// TODO(rax): this is awful fix it
+			for (Constrain con : afsm.constrains) {
+				uk.ac.ucl.cs.afsm.common.predicate.Predicate required = con.required;
+				if (required.equals(v)) {
+					if (con.requiree instanceof uk.ac.ucl.cs.afsm.common.predicate.Variable) {
+						uk.ac.ucl.cs.afsm.common.predicate.Variable var = (uk.ac.ucl.cs.afsm.common.predicate.Variable)con.requiree;
+						satisfyEff.add(Effect.createFormula(AtomicFormula.create(predicates.get(var.getName()), t)));
+					} else {
+						uk.ac.ucl.cs.afsm.common.predicate.Variable var = (uk.ac.ucl.cs.afsm.common.predicate.Variable)((Operator.Not)con.requiree).getPredicate();
+						satisfyEff.add(Effect.createFormula(AtomicFormula.create(predicates.get(var.getName()), t)));
+					}
+				} else if (required instanceof Operator.Not) {
+					required = ((Operator.Not)required).getPredicate();
+					if (required.equals(v)) {
+						if (con.requiree instanceof uk.ac.ucl.cs.afsm.common.predicate.Variable) {
+							uk.ac.ucl.cs.afsm.common.predicate.Variable var = (uk.ac.ucl.cs.afsm.common.predicate.Variable)con.requiree;
+							unsatisfyEff.add(Effect.createFormula(AtomicFormula.create(predicates.get(var.getName()), t)));
+						} else {
+							uk.ac.ucl.cs.afsm.common.predicate.Variable var = (uk.ac.ucl.cs.afsm.common.predicate.Variable)((Operator.Not)con.requiree).getPredicate();
+							unsatisfyEff.add(Effect.createFormula(AtomicFormula.create(predicates.get(var.getName()), t)));
+						}
+					}
+				}
+			}
+			satisfyEff.add(Effect.createFormula(AtomicFormula.create(predicates.get(v.getName()), t)));
+			unsatisfyEff.add(Effect.createNot(AtomicFormula.create(predicates.get(v.getName()), t)));
+			
+			Effect satisfyEffect = Effect.createAnd(satisfyEff.toArray(new Effect[satisfyEff.size()]));
+			Effect unsatisfyEffect = Effect.createAnd(unsatisfyEff.toArray(new Effect[unsatisfyEff.size()]));
+			
+			ActionDefBody body_satisfy = ActionDefBody.create(satisfyPreconditions, satisfyEffect);
+			ActionDefBody body_unsatisfy = ActionDefBody.create(unsatisfyPreconditions, unsatisfyEffect);
 			
 			ActionDef actionDef = ActionDef.create(satisfy, typedList, body_satisfy);
 			StructureDef struct = StructureDef.create(actionDef);
