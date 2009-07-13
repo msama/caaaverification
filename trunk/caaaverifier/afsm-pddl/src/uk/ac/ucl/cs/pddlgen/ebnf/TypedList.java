@@ -48,6 +48,9 @@ public abstract class TypedList<T extends Streamable> extends Streamable {
 				super.writeSpaceSeparatedList(names);
 				pw.print(" - ");
 				writeInto(pw, type);
+				if (tail != null) {
+					pw.print(" ");
+				}
 				writeIntoIfDefined(tail, pw);
 			}
 		};

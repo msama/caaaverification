@@ -36,9 +36,9 @@ public class ActionDef extends Streamable {
 		++ alignment;
 		align();
 		
-		pw.print(":parameters ( ");
+		pw.print(":parameters (");
 		writeInto(pw, variables);
-		pw.print(" )");
+		pw.print(")");
 		
 		writeInto(pw, actionDefBody);
 		
