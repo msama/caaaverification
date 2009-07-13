@@ -17,7 +17,7 @@ public class TypesDef extends Streamable {
 	protected void printInternal() {
 		pw.print("(:types ");
 		writeInto(pw, typedList);
-		pw.print(" )");
+		pw.print(")");
 	}
 
 	public static TypesDef create(TypedList<Name> typedList) {

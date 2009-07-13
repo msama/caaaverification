@@ -2,8 +2,10 @@ package uk.ac.ucl.cs.pddlgen;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import phoneAdapter.PhoneAdapterAfsm;
 
@@ -46,7 +48,19 @@ public class AfsmParser {
 
 	private AdaptationFiniteStateMachine afsm;
 	
-	private Map<String, Name> names = new HashMap<String, Name>();
+	private static final String STATE = "state";
+	private static final String CONTEXT = "context";
+	
+	private static final Name STATE_NAME = Name.create(STATE);
+	private static final Name CONTEXT_NAME = Name.create(CONTEXT);
+	
+	private static final Variable STATE_VARIABLE = Variable.create("s");
+	private static final Variable CONTEXT_VARIABLE = Variable.create("v");
+	
+	private static final Type STATE_TYPE = Type.create(STATE_NAME);
+	private static final Type CONTEXT_TYPE = Type.create(CONTEXT_NAME);
+	
+	//private Map<String, Name> names = new HashMap<String, Name>();
 	
 	//private Map<String, Variable> variables = new HashMap<String, Variable>();
 	
@@ -95,7 +109,7 @@ public class AfsmParser {
 		List<RequireKey> keys = new ArrayList<RequireKey>();
 		keys.add(RequireKey.TYPING);
 		keys.add(RequireKey.CONSTRAINTS);
-		keys.add(RequireKey.PREFERENCIES);
+		keys.add(RequireKey.PREFERENCES);
 		keys.add(RequireKey.DISJUNCTIVE_PRECONDITIONS);
 		Streamable.definedKeys.addAll(keys);
 		return RequireDef.create(keys);
@@ -111,14 +125,8 @@ public class AfsmParser {
 	 */
 	private TypesDef createTypesDef() {
 		List<Name> names = new ArrayList<Name>();
-		Name state = Name.create("state");
-		names.add(state);
-		this.names.put("state",state);
-		for (String name : afsm.variables.keySet()) {
-			Name var = Name.create(name);
-			names.add(var);
-			this.names.put(name, var);
-		}
+		names.add(STATE_NAME);
+		names.add(CONTEXT_NAME);
 		
 		TypedList<Name> types = TypedList.create(names);
 		return TypesDef.create(types);
@@ -149,38 +157,33 @@ public class AfsmParser {
 	private PredicatesDef createPredicatesDef() {
 		List<AtomicFormulaSkeleton> formulas = new ArrayList<AtomicFormulaSkeleton>();
 		
-		Type t = null;
-		Variable var = null;
+		//Type t = null;
+		//Variable var = null;
 		List<Variable> vars = new ArrayList<Variable>();
 
-		t= Type.create(this.names.get("state"));
-		var = Variable.create("s");
-		vars.add(var);
+		//t= Type.create(this.names.get("state"));
+		//var = Variable.create("s");
+		vars.add(STATE_VARIABLE);
 		
 		for (State state : afsm.states) {
-			String key = "is-state-" + state.getName();
-			Predicate predicate = Predicate.create(key);
+			String key = state.getName();
+			Predicate predicate = Predicate.create("is-state-" + key);
 
-			TypedList<Variable> typedList = TypedList.create(vars, t, null);
+			TypedList<Variable> typedList = TypedList.create(vars, STATE_TYPE, null);
 			AtomicFormulaSkeleton skeleton = AtomicFormulaSkeleton.create(predicate, typedList);
 			formulas.add(skeleton);
 			predicates.put(key, predicate);
 		}
 		
 
+		vars = new ArrayList<Variable>();
+		vars.add(CONTEXT_VARIABLE);
 		
 		for (String name : afsm.variables.keySet()) {
-			// defensive approach
-			t = null;
-			var = null;
-			vars.clear();
-			//
-			t= Type.create(this.names.get(name));
-			String key = "is-true-" + name;
-			Predicate predicate = Predicate.create(key);
-			var = Variable.create("v");
-			vars.add(var);
-			TypedList<Variable> typedList = TypedList.create(vars, t, null);
+			
+			String key = name;
+			Predicate predicate = Predicate.create("is-true-" + key);
+			TypedList<Variable> typedList = TypedList.create(vars, CONTEXT_TYPE, null);
 			AtomicFormulaSkeleton skeleton = AtomicFormulaSkeleton.create(predicate, typedList);
 			formulas.add(skeleton);
 			predicates.put(key, predicate);
@@ -221,21 +224,19 @@ public class AfsmParser {
 			TypedList<Variable> typedList = null;
 			ActionFunctor functor = new ActionFunctor(Name.create("rule_" + rule.getName()));
 			
-			for (uk.ac.ucl.cs.afsm.common.predicate.Variable v : rule.getAllVariables()) {
-				Type t = Type.create(names.get(v.getName()));
-				List<Variable> vars = new ArrayList<Variable>();
-				vars.add(Variable.create(v.getName()));
-				typedList = TypedList.create(vars, t, typedList);
-			}
-			// Add state as a variable
-			{
-				Type t = Type.create(names.get("state"));
-				List<Variable> vars = new ArrayList<Variable>();
-				vars.add(Variable.create("state"));
-				typedList = TypedList.create(vars, t, typedList);
-			}
+			// Add vontext
+			List<Variable> vars = new ArrayList<Variable>();
+			vars.add(CONTEXT_VARIABLE);
+			typedList = TypedList.create(vars, CONTEXT_TYPE, typedList);
 			
-			GD preconditions = parsePredicate(rule.getTrigger());
+			// Add state as a variable
+			vars = new ArrayList<Variable>();
+			vars.add(STATE_VARIABLE);
+			typedList = TypedList.create(vars, STATE_TYPE, typedList);
+			
+			GD trigger = parsePredicate(rule.getTrigger());
+			GD initialStates = parseInitialStates(rule);
+			GD preconditions = GD.createAnd(initialStates, trigger); 
 			
 			// +1 because it also contains the future state
 			Effect[] and = new Effect[rule.action.size() + 1];
@@ -244,9 +245,9 @@ public class AfsmParser {
 			for (Assignment a : rule.action) {
 				Effect eff;
 				// predicate must be one satisfying the variable
-				Predicate predicate = predicates.get("is-true-" + a.getVariable().getName());
+				Predicate predicate = predicates.get(a.getVariable().getName());
 				// the term is the name of the local variable
-				Term term = Term.create(names.get(a.getVariable().getName()));
+				Term term = Term.create(CONTEXT_VARIABLE);
 				AtomicFormula<Term> formula = AtomicFormula.create(predicate, term);
 				if (a instanceof Assignment.Satisfy) {
 					eff = Effect.createFormula(formula);
@@ -258,9 +259,9 @@ public class AfsmParser {
 			
 			//Add the future state
 			// predicate must be one satisfying the variable
-			Predicate predicate = predicates.get("is-state-" + rule.getDestination().getName());
+			Predicate predicate = predicates.get(rule.getDestination().getName());
 			// the term is the name of the local variable
-			Term t = Term.create(Variable.create(names.get("state")));
+			Term t = Term.create(STATE_VARIABLE);
 			AtomicFormula<Term> formula = AtomicFormula.create(predicate, t);	
 			and[i] = Effect.createFormula(formula);
 			Effect effect = Effect.createAnd(and);
@@ -285,8 +286,8 @@ public class AfsmParser {
 			throw new IllegalStateException("False not defined: " + predicate);
 		} if (predicate instanceof uk.ac.ucl.cs.afsm.common.predicate.Variable) {
 			uk.ac.ucl.cs.afsm.common.predicate.Variable v = (uk.ac.ucl.cs.afsm.common.predicate.Variable)predicate;
-			Term t = Term.create(Variable.create(names.get(v.getName())));
-			AtomicFormula<Term> formula = AtomicFormula.create(predicates.get("is-true-" + v.getName()), t);
+			Term t = Term.create(CONTEXT_VARIABLE);
+			AtomicFormula<Term> formula = AtomicFormula.create(predicates.get(v.getName()), t);
 			return GD.createFormula(formula);
 		} else if (predicate instanceof Operator.Not) {
 			Operator.Not not = (Operator.Not) predicate;
@@ -308,5 +309,25 @@ public class AfsmParser {
 		}
 		throw new IllegalStateException(
 				"This method should have already returned a value: " + predicate);
+	}
+	
+	private GD parseInitialStates(Rule r) {
+		Term t = Term.create(STATE_VARIABLE);
+		List<GD> states = new ArrayList<GD>();
+		for (State s : afsm.states) {
+			if (s.outGoingRules.contains(r)) {
+				AtomicFormula<Term> formula = AtomicFormula.create(predicates.get(s.getName()), t);
+				states.add(GD.createFormula(formula));
+			}
+		}
+		// TODO(rax): if size is 0 the rule is dead...
+		
+		if (states.size() == 1) {
+			return states.get(0);
+		}
+		
+		GD[] orGD = new GD[states.size()];
+		orGD = states.toArray(orGD);
+		return GD.createOr(orGD);
 	}
 }
