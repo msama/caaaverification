@@ -19,9 +19,9 @@ public abstract class Effect extends Streamable {
 		++alignment;
 		for (Effect eff : effects) {
 			align();
-			pw.print("(");
+			//pw.print("(");
 			writeInto(pw, eff);
-			pw.print(")");
+			//pw.print(")");
 		}
 		--alignment;
 		//align();
@@ -125,7 +125,7 @@ public abstract class Effect extends Streamable {
 		
 		Effect result = new Effect(){ 
 			protected void printInternal() {
-				pw.print("(not ");
+				pw.print("(when ");
 				++alignment;
 				align();
 				writeInto(pw, gd);
