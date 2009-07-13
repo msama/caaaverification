@@ -1,14 +1,11 @@
 package uk.ac.ucl.cs.pddlgen;
 
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import phoneAdapter.PhoneAdapterAfsm;
-
-import com.sun.org.apache.bcel.internal.generic.ATHROW;
 
 import uk.ac.ucl.cs.afsm.common.AdaptationFiniteStateMachine;
 import uk.ac.ucl.cs.afsm.common.Assignment;
