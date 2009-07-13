@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import uk.ac.ucl.cs.afsm.common.predicate.Constrain;
 import uk.ac.ucl.cs.afsm.common.predicate.Predicate;
 import uk.ac.ucl.cs.afsm.common.predicate.Variable;
 
@@ -48,6 +49,12 @@ public class AdaptationFiniteStateMachine {
 	 * {@link AdaptationFiniteStateMachine}.
 	 */
 	public final ArrayList<Rule> rules = new ArrayList<Rule>();
+	
+	/**
+	 * Collects all the {@link Rule}s defined in this
+	 * {@link AdaptationFiniteStateMachine}.
+	 */
+	public final ArrayList<Constrain> constrains = new ArrayList<Constrain>();
 	
 	private State initialState;
 
@@ -101,6 +108,10 @@ public class AdaptationFiniteStateMachine {
 		s.setEnd(end);
 		states.add(s);
 		return s;
+	}
+	
+	public void constrain(Constrain c) {
+		constrains.add(c);
 	}
 
 	/**
