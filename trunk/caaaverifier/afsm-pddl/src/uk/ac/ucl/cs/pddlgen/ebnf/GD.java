@@ -74,12 +74,17 @@ public class GD extends Streamable {
 				break;
 			case NOT:
 				pw.print("(not ");
-				writeGD(not);
+				if (not.expansion == Expansion.FORMULA ||
+						not.expansion == Expansion.LITERAL ||
+						not.expansion == Expansion.NOT) {
+					writeInto(pw, not);
+				} else {
+					writeGD(not);
+				}
 				pw.print(")");
 				break;
 			case IMPLY:
 				pw.print("(imply ");
-				++alignment;
 				writeGD(implyPrecondition);
 				writeGD(implyEffect);
 				pw.print(")");
