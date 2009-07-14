@@ -13,6 +13,7 @@ import uk.ac.ucl.cs.afsm.common.AfsmBuilder;
 import uk.ac.ucl.cs.afsm.common.Context;
 import uk.ac.ucl.cs.afsm.common.Rule;
 import uk.ac.ucl.cs.afsm.common.State;
+import uk.ac.ucl.cs.afsm.common.predicate.Constrain;
 import uk.ac.ucl.cs.afsm.common.predicate.Predicate;
 import uk.ac.ucl.cs.afsm.common.predicate.Variable;
 
@@ -54,33 +55,25 @@ public class PhoneAdapterAfsm implements AfsmBuilder {
 		State office = afsm.state("Office", false, false);
 		State meeting = afsm.state("Meeting", false, false);
 		State synch = afsm.state("Synch", false, false);
-		/*
+		
 		//constraints
 		//Gps.isValid
-		Constraint c_gpsAB=new Constraint(new NotPredicate(afsm.getVariableByName("A_gps")),new NotPredicate(afsm.getVariableByName("B_gps")));
-		Constraint c_gpsAC=new Constraint(new NotPredicate(afsm.getVariableByName("A_gps")),new NotPredicate(afsm.getVariableByName("C_gps")));
-		Constraint c_gpsAD=new Constraint(new NotPredicate(afsm.getVariableByName("A_gps")),new NotPredicate(afsm.getVariableByName("D_gps")));
-		Constraint c_gpsAE=new Constraint(new NotPredicate(afsm.getVariableByName("A_gps")),new NotPredicate(afsm.getVariableByName("E_gps")));
-		afsm.addConstrain(c_gpsAB);
-		afsm.addConstrain(c_gpsAC);
-		afsm.addConstrain(c_gpsAD);
-		afsm.addConstrain(c_gpsAE);
+		afsm.constrain(Constrain.createNotAThenNotB(varGpsA, varGpsB));
+		afsm.constrain(Constrain.createNotAThenNotB(varGpsA, varGpsC));
+		afsm.constrain(Constrain.createNotAThenNotB(varGpsA, varGpsD));
+		afsm.constrain(Constrain.createNotAThenNotB(varGpsA, varGpsE));
 		
 		//home != office
-		Constraint c_home=new Constraint(afsm.getVariableByName("B_gps"),new NotPredicate(afsm.getVariableByName("C_gps")));
-		afsm.addConstrain(c_home);
-		Constraint c_office=new Constraint(afsm.getVariableByName("C_gps"),new NotPredicate(afsm.getVariableByName("B_gps")));
-		afsm.addConstrain(c_office);
+		afsm.constrain(Constrain.createAThenNotB(varGpsB, varGpsC));
+		afsm.constrain(Constrain.createAThenNotB(varGpsC, varGpsB));
 		
 		//speed>70 -> speed>5
-		Constraint c_speed=new Constraint(afsm.getVariableByName("E_gps"),afsm.getVariableByName("D_gps"));
-		afsm.addConstrain(c_speed);
+		afsm.constrain(Constrain.createAThenNotB(varGpsE, varGpsD));
+		// Speed <5 -> speed <70
+		afsm.constrain(Constrain.createAThenNotB(varGpsD, varGpsE));
 		
-		//time 
-		Constraint c_time=new Constraint(afsm.getVariableByName("B_t"),afsm.getVariableByName("A_t"));
-		afsm.addConstrain(c_time);
-		 */
-		
+		//time
+		afsm.constrain(Constrain.createAThenB(varTimeB, varTimeA));
 		
 		// TODO(rax): we could insert effects here
 		
