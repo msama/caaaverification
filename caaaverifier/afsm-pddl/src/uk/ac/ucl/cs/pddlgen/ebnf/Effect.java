@@ -50,11 +50,11 @@ public abstract class Effect extends Streamable {
 		Effect effect = new Effect(){ 
 			protected void printInternal() {
 				pw.print("(not ");
-				++alignment;
-				align();
+				//++alignment;
+				//align();
 				writeInto(pw, formula);
-				--alignment;
-				align();
+				//--alignment;
+				//align();
 				pw.print(")");
 			}
 		};

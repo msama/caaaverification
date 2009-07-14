@@ -60,12 +60,19 @@ public class AfsmParser {
 	
 	private static final Type STATE_TYPE = Type.create(STATE_NAME);
 	private static final Type CONTEXT_TYPE = Type.create(CONTEXT_NAME);
+
+	private static final Term STATE_TERM = Term.create(STATE_VARIABLE);
+	private static final Term CONTEXT_TERM = Term.create(CONTEXT_VARIABLE);
 	
 	//private Map<String, Name> names = new HashMap<String, Name>();
 	
 	//private Map<String, Variable> variables = new HashMap<String, Variable>();
 	
 	private Map<String, Predicate> predicates = new HashMap<String, Predicate>();
+	
+	private Map<String, StructureDef> actionRules = new HashMap<String, StructureDef>();
+	
+	private Map<String, StructureDef> actionEvent = new HashMap<String, StructureDef>();
 	
 	/**
 	 * @param afsm
@@ -215,59 +222,34 @@ public class AfsmParser {
 		
 		List<StructureDef> defs = new ArrayList<StructureDef>();
 		
-		//Type t = null;
-		//Variable var = null;
-		//List<Variable> vars = new ArrayList<Variable>();
-		//TypedList<Variable> typedList = null;
-		
 		// Add an action for each Rule
 		for (Rule rule : afsm.rules) {
 			TypedList<Variable> typedList = null;
 			ActionFunctor functor = new ActionFunctor(Name.create("rule_" + rule.getName()));
 			
 			// Add vontext
-			List<Variable> vars = new ArrayList<Variable>();
-			vars.add(CONTEXT_VARIABLE);
-			typedList = TypedList.create(vars, CONTEXT_TYPE, typedList);
+			typedList = createTypedList(CONTEXT_VARIABLE, CONTEXT_TYPE, typedList);
 			
 			// Add state as a variable
-			vars = new ArrayList<Variable>();
-			vars.add(STATE_VARIABLE);
-			typedList = TypedList.create(vars, STATE_TYPE, typedList);
+			typedList = createTypedList(STATE_VARIABLE, STATE_TYPE, typedList);
 			
 			GD trigger = parsePredicate(rule.getTrigger());
 			GD initialStates = parseInitialStates(rule);
 			GD preconditions = GD.createAnd(initialStates, trigger); 
 			
-			// +1 because it also contains the future state
-			Effect[] and = new Effect[rule.action.size() + 1];
+			
+			Effect[] and = new Effect[rule.action.size() + afsm.states.size()];
 			
 			int i = 0;
 			for (Assignment a : rule.action) {
-				Effect eff;
-				// predicate must be one satisfying the variable
-				Predicate predicate = predicates.get(a.getVariable().getName());
-				// the term is the name of the local variable
-				Term term = Term.create(CONTEXT_VARIABLE);
-				AtomicFormula<Term> formula = AtomicFormula.create(predicate, term);
-				if (a instanceof Assignment.Satisfy) {
-					eff = Effect.createFormula(formula);
-				} else {
-					eff = Effect.createNot(formula);
-				}
-				and[i++] = eff;
+				and[i++] = createEffectForAssignment(a);
 			}
 			
 			//Add the future state
-			// predicate must be one satisfying the variable
-			Predicate predicate = predicates.get(rule.getDestination().getName());
-			// the term is the name of the local variable
-			Term t = Term.create(STATE_VARIABLE);
-			AtomicFormula<Term> formula = AtomicFormula.create(predicate, t);	
-			and[i] = Effect.createFormula(formula);
+			for (State s : afsm.states) {
+				and[i++] = createEffectForState(s, !(s.equals(rule.getDestination())));
+			}
 			Effect effect = Effect.createAnd(and);
-			
-			
 			
 			ActionDefBody body = ActionDefBody.create(preconditions, effect);
 			ActionDef actionDef = ActionDef.create(functor, typedList, body);
@@ -283,11 +265,8 @@ public class AfsmParser {
 			ActionFunctor unsatisfy = new ActionFunctor(Name.create("unsatisfy_" + v.getName()));
 			
 			TypedList<Variable> typedList = null;
-			// Add vontext
-			List<Variable> vars = new ArrayList<Variable>();
-			vars.add(CONTEXT_VARIABLE);
-			typedList = TypedList.create(vars, CONTEXT_TYPE, typedList);
-			
+			// Add context
+			typedList = createTypedList(CONTEXT_VARIABLE, CONTEXT_TYPE, typedList);
 			
 			List<GD> satisfyPrec = new ArrayList<GD>();
 			List<GD> unsatisfyPrec = new ArrayList<GD>();
@@ -322,11 +301,6 @@ public class AfsmParser {
 			}
 			
 			// Add AND with the variable negated
-			
-			
-			
-			//Effect effect_positive = Effect.createFormula(formula);
-			//Effect effect_negative = Effect.createFormula(formula);
 			List<Effect> satisfyEff = new ArrayList<Effect>();
 			List<Effect> unsatisfyEff = new ArrayList<Effect>();
 			
@@ -375,6 +349,24 @@ public class AfsmParser {
 		return defs;
 	}
 	
+	private TypedList<Variable> createTypedList(Variable v, Type t, TypedList<Variable>  tail) {
+		List<Variable> vars = new ArrayList<Variable>();
+		vars.add(v);
+		return TypedList.create(vars, t, tail);
+	}
+
+	private Effect createEffectForAssignment(Assignment s) {
+		Predicate predicate = predicates.get(s.getVariable().getName());
+		AtomicFormula<Term> formula = AtomicFormula.create(predicate, CONTEXT_TERM);	
+		return (s instanceof Assignment.Negate) ? Effect.createNot(formula) : Effect.createFormula(formula);
+	}
+	
+	private Effect createEffectForState(State s, boolean negate) {
+		Predicate predicate = predicates.get(s.getName());
+		AtomicFormula<Term> formula = AtomicFormula.create(predicate, STATE_TERM);	
+		return negate ? Effect.createNot(formula) : Effect.createFormula(formula);
+	}
+	
 	private GD parsePredicate(uk.ac.ucl.cs.afsm.common.predicate.Predicate predicate) {
 		if (predicate == Constant.TRUE) {
 			throw new IllegalStateException("True not defined: " + predicate);
@@ -382,8 +374,7 @@ public class AfsmParser {
 			throw new IllegalStateException("False not defined: " + predicate);
 		} if (predicate instanceof uk.ac.ucl.cs.afsm.common.predicate.Variable) {
 			uk.ac.ucl.cs.afsm.common.predicate.Variable v = (uk.ac.ucl.cs.afsm.common.predicate.Variable)predicate;
-			Term t = Term.create(CONTEXT_VARIABLE);
-			AtomicFormula<Term> formula = AtomicFormula.create(predicates.get(v.getName()), t);
+			AtomicFormula<Term> formula = AtomicFormula.create(predicates.get(v.getName()), CONTEXT_TERM);
 			return GD.createFormula(formula);
 		} else if (predicate instanceof Operator.Not) {
 			Operator.Not not = (Operator.Not) predicate;
@@ -408,11 +399,10 @@ public class AfsmParser {
 	}
 	
 	private GD parseInitialStates(Rule r) {
-		Term t = Term.create(STATE_VARIABLE);
 		List<GD> states = new ArrayList<GD>();
 		for (State s : afsm.states) {
 			if (s.outGoingRules.contains(r)) {
-				AtomicFormula<Term> formula = AtomicFormula.create(predicates.get(s.getName()), t);
+				AtomicFormula<Term> formula = AtomicFormula.create(predicates.get(s.getName()), STATE_TERM);
 				states.add(GD.createFormula(formula));
 			}
 		}
