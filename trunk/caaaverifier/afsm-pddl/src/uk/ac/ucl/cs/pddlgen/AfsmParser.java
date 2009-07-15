@@ -64,10 +64,6 @@ public class AfsmParser {
 	private static final Term STATE_TERM = Term.create(STATE_VARIABLE);
 	private static final Term CONTEXT_TERM = Term.create(CONTEXT_VARIABLE);
 	
-	//private Map<String, Name> names = new HashMap<String, Name>();
-	
-	//private Map<String, Variable> variables = new HashMap<String, Variable>();
-	
 	private Map<String, Predicate> predicates = new HashMap<String, Predicate>();
 	
 	private Map<String, StructureDef> actionRules = new HashMap<String, StructureDef>();
@@ -254,6 +250,7 @@ public class AfsmParser {
 			ActionDefBody body = ActionDefBody.create(preconditions, effect);
 			ActionDef actionDef = ActionDef.create(functor, typedList, body);
 			StructureDef struct = StructureDef.create(actionDef);
+			actionRules.put(rule.getName(), struct);
 			defs.add(struct);
 		}
 		
@@ -323,7 +320,7 @@ public class AfsmParser {
 							unsatisfyEff.add(Effect.createFormula(AtomicFormula.create(predicates.get(var.getName()), t)));
 						} else {
 							uk.ac.ucl.cs.afsm.common.predicate.Variable var = (uk.ac.ucl.cs.afsm.common.predicate.Variable)((Operator.Not)con.requiree).getPredicate();
-							unsatisfyEff.add(Effect.createFormula(AtomicFormula.create(predicates.get(var.getName()), t)));
+							unsatisfyEff.add(Effect.createNot(AtomicFormula.create(predicates.get(var.getName()), t)));
 						}
 					}
 				}
@@ -339,10 +336,12 @@ public class AfsmParser {
 			
 			ActionDef actionDef = ActionDef.create(satisfy, typedList, body_satisfy);
 			StructureDef struct = StructureDef.create(actionDef);
+			actionEvent.put(v.getName(), struct);
 			defs.add(struct);
 			
 			actionDef = ActionDef.create(unsatisfy, typedList, body_unsatisfy);
 			struct = StructureDef.create(actionDef);
+			actionEvent.put(v.getName(), struct);
 			defs.add(struct);
 		}
 		
