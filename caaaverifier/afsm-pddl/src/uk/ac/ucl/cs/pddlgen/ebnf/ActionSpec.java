@@ -5,7 +5,7 @@ package uk.ac.ucl.cs.pddlgen.ebnf;
 
 /**
  * @author rax
- *
+ * TODO(rax): this class should be a template
  */
 public abstract class ActionSpec extends Streamable {
 
