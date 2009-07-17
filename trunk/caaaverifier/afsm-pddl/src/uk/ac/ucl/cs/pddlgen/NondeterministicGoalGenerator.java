@@ -3,6 +3,8 @@
  */
 package uk.ac.ucl.cs.pddlgen;
 
+import java.io.PrintStream;
+
 import uk.ac.ucl.cs.afsm.common.AdaptationFiniteStateMachine;
 
 /**
@@ -25,5 +27,7 @@ public class NondeterministicGoalGenerator {
 	}
 
 	
-
+	public void createGoals(PrintStream ps) {
+		
+	}
 }
