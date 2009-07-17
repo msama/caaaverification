@@ -64,17 +64,23 @@ public class AfsmParser {
 	private static final Term STATE_TERM = Term.create(STATE_VARIABLE);
 	private static final Term CONTEXT_TERM = Term.create(CONTEXT_VARIABLE);
 	
+	private Name domainName;
+	
+	private RequireDef requireDef;
+	
 	private Map<String, Predicate> predicates = new HashMap<String, Predicate>();
 	
-	private Map<String, StructureDef> actionRules = new HashMap<String, StructureDef>();
-	
-	private Map<String, StructureDef> actionEvent = new HashMap<String, StructureDef>();
+	private Map<Rule, GD> ruleTriggersGD = new HashMap<Rule, GD>();
+
+	private Predicate existPredicate;
 	
 	/**
 	 * @param afsm
 	 */
 	public AfsmParser(AdaptationFiniteStateMachine afsm) {
 		this.afsm = afsm;
+		domainName = Name.create(afsm.getName());
+		requireDef = createRequireDef();
 	}
 	
 	public static void main(String[] args) {
@@ -85,9 +91,9 @@ public class AfsmParser {
 	
 	public Domain parse() {
 		Domain domain = Domain.create(
-				Name.create(afsm.getName()),
+				domainName,
 				null, //createExtensionDef(),
-				createRequireDef(), 
+				requireDef,//createRequireDef(), 
 				createTypesDef(), 
 				null, //createConstantsDef(), 
 				null, //createDomainVarsDef(), 
@@ -183,17 +189,26 @@ public class AfsmParser {
 		vars = new ArrayList<Variable>();
 		vars.add(CONTEXT_VARIABLE);
 		
+		existPredicate = Predicate.create("exist");
+		createContextAtomicFormulaSkeleton(vars, existPredicate);
+		predicates.put("exist", existPredicate);
+		
 		for (String name : afsm.variables.keySet()) {
-			
-			String key = name;
-			Predicate predicate = Predicate.create("is-true-" + key);
-			TypedList<Variable> typedList = TypedList.create(vars, CONTEXT_TYPE, null);
-			AtomicFormulaSkeleton skeleton = AtomicFormulaSkeleton.create(predicate, typedList);
+			Predicate predicate = Predicate.create("is-true-" + name);
+			AtomicFormulaSkeleton skeleton = createContextAtomicFormulaSkeleton(vars,
+					predicate);
 			formulas.add(skeleton);
-			predicates.put(key, predicate);
+			predicates.put(name, predicate);
 		}
 		
 		return PredicatesDef.create(formulas);
+	}
+
+	private AtomicFormulaSkeleton createContextAtomicFormulaSkeleton(
+			List<Variable> vars, Predicate predicate) {
+		TypedList<Variable> typedList = TypedList.create(vars, CONTEXT_TYPE, null);
+		AtomicFormulaSkeleton skeleton = AtomicFormulaSkeleton.create(predicate, typedList);
+		return skeleton;
 	}
 	
 	private TimelessDef createTimelessDef() {
@@ -220,19 +235,12 @@ public class AfsmParser {
 		
 		// Add an action for each Rule
 		for (Rule rule : afsm.rules) {
-			TypedList<Variable> typedList = null;
-			ActionFunctor functor = new ActionFunctor(Name.create("rule_" + rule.getName()));
-			
-			// Add vontext
-			typedList = createTypedList(CONTEXT_VARIABLE, CONTEXT_TYPE, typedList);
-			
-			// Add state as a variable
-			typedList = createTypedList(STATE_VARIABLE, STATE_TYPE, typedList);
+			TypedList<Variable> typedList = createStateContextTypedList();
 			
 			GD trigger = parsePredicate(rule.getTrigger());
+			ruleTriggersGD.put(rule, trigger);
 			GD initialStates = parseInitialStates(rule);
 			GD preconditions = GD.createAnd(initialStates, trigger); 
-			
 			
 			Effect[] and = new Effect[rule.action.size() + afsm.states.size()];
 			
@@ -248,18 +256,13 @@ public class AfsmParser {
 			Effect effect = Effect.createAnd(and);
 			
 			ActionDefBody body = ActionDefBody.create(preconditions, effect);
-			ActionDef actionDef = ActionDef.create(functor, typedList, body);
-			StructureDef struct = StructureDef.create(actionDef);
-			actionRules.put(rule.getName(), struct);
+			StructureDef struct = StructureDef.create(Name.create("rule_" + rule.getName()), typedList, body);
 			defs.add(struct);
 		}
 		
 		// Add events to satisfy/unsatisfy each variables
 		for (String key : afsm.variables.keySet()) {
 			uk.ac.ucl.cs.afsm.common.predicate.Variable v = afsm.variables.get(key);
-			
-			ActionFunctor satisfy = new ActionFunctor(Name.create("satisfy_" + v.getName()));
-			ActionFunctor unsatisfy = new ActionFunctor(Name.create("unsatisfy_" + v.getName()));
 			
 			TypedList<Variable> typedList = null;
 			// Add context
@@ -334,21 +337,28 @@ public class AfsmParser {
 			ActionDefBody body_satisfy = ActionDefBody.create(satisfyPreconditions, satisfyEffect);
 			ActionDefBody body_unsatisfy = ActionDefBody.create(unsatisfyPreconditions, unsatisfyEffect);
 			
-			ActionDef actionDef = ActionDef.create(satisfy, typedList, body_satisfy);
-			StructureDef struct = StructureDef.create(actionDef);
-			actionEvent.put(v.getName(), struct);
+			StructureDef struct = StructureDef.create(Name.create("satisfy_" + v.getName()), typedList, body_satisfy);
 			defs.add(struct);
 			
-			actionDef = ActionDef.create(unsatisfy, typedList, body_unsatisfy);
-			struct = StructureDef.create(actionDef);
-			actionEvent.put(v.getName(), struct);
+			struct = StructureDef.create(Name.create("unsatisfy_" + v.getName()), typedList, body_unsatisfy);
 			defs.add(struct);
 		}
 		
 		return defs;
 	}
+
+	public static TypedList<Variable> createStateContextTypedList() {
+		TypedList<Variable> typedList = null;
+		
+		// Add vontext
+		typedList = createTypedList(CONTEXT_VARIABLE, CONTEXT_TYPE, typedList);
+		
+		// Add state as a variable
+		typedList = createTypedList(STATE_VARIABLE, STATE_TYPE, typedList);
+		return typedList;
+	}
 	
-	private TypedList<Variable> createTypedList(Variable v, Type t, TypedList<Variable>  tail) {
+	private static TypedList<Variable> createTypedList(Variable v, Type t, TypedList<Variable>  tail) {
 		List<Variable> vars = new ArrayList<Variable>();
 		vars.add(v);
 		return TypedList.create(vars, t, tail);
@@ -414,5 +424,33 @@ public class AfsmParser {
 		GD[] orGD = new GD[states.size()];
 		orGD = states.toArray(orGD);
 		return GD.createOr(orGD);
+	}
+
+	public Name getDomainName() {
+		return domainName;
+	}
+
+	public RequireDef getRequireDef() {
+		return requireDef;
+	}
+
+	public GD getRuleGD(Rule rule) {
+		return ruleTriggersGD.get(rule);
+	}
+	
+	public AtomicFormula<Term> getStateFormulaTerm(State s) {
+		return AtomicFormula.create(predicates.get(s.getName()), STATE_TERM);
+	}
+	
+	public AtomicFormula<Name> getStateFormulaName(State s) {
+		return AtomicFormula.create(predicates.get(s.getName()), STATE_NAME);
+	}
+	
+	public GD getStateGD(State s) {
+		return GD.createFormula(getStateFormulaTerm(s));
+	}
+	
+	public AtomicFormula<Name> getContextFormulaName() {
+		return AtomicFormula.create(existPredicate, CONTEXT_NAME);
 	}
 }
