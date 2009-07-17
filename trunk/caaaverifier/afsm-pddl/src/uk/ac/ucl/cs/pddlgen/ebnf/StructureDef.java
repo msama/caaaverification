@@ -33,6 +33,11 @@ public class StructureDef extends Streamable {
 		align();
 	} 
 
+	public static StructureDef create(Name name, TypedList<Variable> variables,
+			ActionDefBody actionDefBody) {
+		return create(ActionDef.create(new ActionFunctor(name), variables, actionDefBody));
+	}
+	
 	public static StructureDef create(ActionDef actionDef) {
 		if (actionDef == null) {
 			throw new IllegalStateException(

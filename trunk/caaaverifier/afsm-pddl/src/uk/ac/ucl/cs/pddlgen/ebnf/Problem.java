@@ -27,7 +27,7 @@ public class Problem extends Streamable {
 	 * @param goals
 	 * @param lengthSpec
 	 */
-	private Problem(Name domainName, Name problemName, RequireDef requireDef,
+	public Problem(Name domainName, Name problemName, RequireDef requireDef,
 			Situation situation, ObjectDeclaration objectDeclaration,
 			Init init, List<Goal> goals, LengthSpec lengthSpec) {
 		this.domainName = domainName;
