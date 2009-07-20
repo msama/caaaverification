@@ -3,7 +3,6 @@
  */
 package uk.ac.ucl.cs.pddlgen;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,31 +14,25 @@ import uk.ac.ucl.cs.pddlgen.ebnf.Goal;
 import uk.ac.ucl.cs.pddlgen.ebnf.Init;
 import uk.ac.ucl.cs.pddlgen.ebnf.Literal;
 import uk.ac.ucl.cs.pddlgen.ebnf.Name;
-import uk.ac.ucl.cs.pddlgen.ebnf.ObjectDeclaration;
 import uk.ac.ucl.cs.pddlgen.ebnf.Problem;
-import uk.ac.ucl.cs.pddlgen.ebnf.TypedList;
 
 /**
  * @author -RAX- (Michele Sama)
  *
  */
-public class NondeterministicGoalGenerator {
+public class NondeterministicGoalGenerator extends GoalGenerator {
 
-	AdaptationFiniteStateMachine afsm;
-	AfsmParser parser;
-	
 	/**
 	 * @param afsm
 	 * @param parser
 	 */
 	public NondeterministicGoalGenerator(AdaptationFiniteStateMachine afsm,
 			AfsmParser parser) {
-		this.afsm = afsm;
-		this.parser = parser;
+		super(afsm, parser);
 	}
 
-	
-	public List<Problem> createGoals() {
+	@Override
+	public List<Problem> createProblems() {
 		List<Problem> problems = new ArrayList<Problem>();
 		
 		for (int i = 0; i < afsm.rules.size() - 1; i++) {
@@ -79,12 +72,4 @@ public class NondeterministicGoalGenerator {
 		return GD.createAnd(gds.toArray(new GD[gds.size()]));
 	}
 
-	private Init createInit() {
-		List<Literal<Name>> list = new ArrayList<Literal<Name>>();
-		// Initial state
-		list.add(Literal.createFormula(parser.getStateFormulaName(afsm.getInitialState())));
-		// Context
-		list.add(Literal.createFormula(parser.getContextFormulaName()));
-		return Init.create(list);
-	}
 }
