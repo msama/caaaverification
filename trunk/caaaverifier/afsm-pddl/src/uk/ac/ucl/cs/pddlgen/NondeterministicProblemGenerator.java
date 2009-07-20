@@ -11,8 +11,6 @@ import uk.ac.ucl.cs.afsm.common.Rule;
 import uk.ac.ucl.cs.afsm.common.State;
 import uk.ac.ucl.cs.pddlgen.ebnf.GD;
 import uk.ac.ucl.cs.pddlgen.ebnf.Goal;
-import uk.ac.ucl.cs.pddlgen.ebnf.Init;
-import uk.ac.ucl.cs.pddlgen.ebnf.Literal;
 import uk.ac.ucl.cs.pddlgen.ebnf.Name;
 import uk.ac.ucl.cs.pddlgen.ebnf.Problem;
 

@@ -97,6 +97,9 @@ public class AfsmParser {
 		
 		ReachabilityProblemDefinition reachability = new ReachabilityProblemDefinition(afsm, parser);
 		reachability.saveAll("out/reach");
+		
+		InStateViolationProblemDefinition inState = new InStateViolationProblemDefinition(afsm, parser);
+		inState.saveAll("out/instate");
 	}
 	
 	public void save(String foldername) {
@@ -476,6 +479,10 @@ public class AfsmParser {
 	
 	public GD getStateGD(State s) {
 		return GD.createFormula(getStateFormulaTerm(s));
+	}
+	
+	public GD getInStateAssumptionGD(State s) {
+		return parsePredicate(s.getInStateAssumption());
 	}
 	
 	public AtomicFormula<Name> getContextFormulaName() {
