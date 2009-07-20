@@ -5,13 +5,13 @@ import java.util.List;
 
 public class Init extends Streamable {
 
-	private List<Literal<Name>> names = new ArrayList<Literal<Name>>();
+	private List<Literal<Name>> literals = new ArrayList<Literal<Name>>();
 	
 	/**
 	 * @param names
 	 */
 	private Init(List<Literal<Name>> names) {
-		this.names = names;
+		this.literals = names;
 	}
 	
 	public static Init create(List<Literal<Name>> names) {
@@ -24,7 +24,15 @@ public class Init extends Streamable {
 	@Override
 	protected void printInternal() {
 		pw.print("(:init ");
-		writeSpaceSeparatedList(names);
+		int i = 0;
+		for (Literal<Name> literal : literals) {
+			pw.print("(");
+			writeInto(pw, literal);
+			pw.print(")");
+			if (++i < literals.size()) {
+				pw.print(" ");
+			}
+		}
 		pw.print(")");
 	}
 

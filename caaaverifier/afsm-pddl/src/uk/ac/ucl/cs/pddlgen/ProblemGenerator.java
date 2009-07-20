@@ -12,7 +12,7 @@ import uk.ac.ucl.cs.pddlgen.ebnf.Literal;
 import uk.ac.ucl.cs.pddlgen.ebnf.Name;
 import uk.ac.ucl.cs.pddlgen.ebnf.Problem;
 
-public abstract class GoalGenerator {
+public abstract class ProblemGenerator {
 
 	protected AdaptationFiniteStateMachine afsm;
 	protected AfsmParser parser;
@@ -22,7 +22,7 @@ public abstract class GoalGenerator {
 	 * @param afsm
 	 * @param parser
 	 */
-	public GoalGenerator(AdaptationFiniteStateMachine afsm, AfsmParser parser) {
+	public ProblemGenerator(AdaptationFiniteStateMachine afsm, AfsmParser parser) {
 		this.afsm = afsm;
 		this.parser = parser;
 	}	
@@ -30,16 +30,22 @@ public abstract class GoalGenerator {
 	public abstract List<Problem> createProblems();
 	
 	public void save(Problem problem, String folderName) {
-		String filename = folderName + "/" + problem.getProblemName();
+		String filename = folderName + "/" + problem.getProblemName() + ".pddl";
 		try {
 			PrintStream ps = new PrintStream(new File(filename));
 			problem.startWriting(ps);
+			ps.flush();
+			ps.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
 	}
 	
 	public void saveAll(String folderName) {
+		File folder = new File(folderName);
+		folder.mkdirs();
+		folder = null;
+		
 		List<Problem> problems = createProblems();
 		for (Problem p : problems) {
 			save(p, folderName);

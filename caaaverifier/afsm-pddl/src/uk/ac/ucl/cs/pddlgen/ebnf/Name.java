@@ -30,4 +30,9 @@ public class Name extends Streamable {
 		n.name = name;
 		return n;
 	}
+
+	@Override
+	public String toString() {
+		return name;
+	}
 }

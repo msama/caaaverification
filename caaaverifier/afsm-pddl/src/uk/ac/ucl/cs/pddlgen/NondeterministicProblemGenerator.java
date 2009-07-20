@@ -20,13 +20,13 @@ import uk.ac.ucl.cs.pddlgen.ebnf.Problem;
  * @author -RAX- (Michele Sama)
  *
  */
-public class NondeterministicGoalGenerator extends GoalGenerator {
+public class NondeterministicProblemGenerator extends ProblemGenerator {
 
 	/**
 	 * @param afsm
 	 * @param parser
 	 */
-	public NondeterministicGoalGenerator(AdaptationFiniteStateMachine afsm,
+	public NondeterministicProblemGenerator(AdaptationFiniteStateMachine afsm,
 			AfsmParser parser) {
 		super(afsm, parser);
 	}
@@ -39,6 +39,10 @@ public class NondeterministicGoalGenerator extends GoalGenerator {
 			Rule rule1 = afsm.rules.get(i);
 			for (int j = i + 1; j < afsm.rules.size(); j++) {
 				Rule rule2 = afsm.rules.get(j);
+				
+				if (!haveCommonStates(rule1,rule2)) {
+					continue;
+				}
 				
 				Goal goal = Goal.create(
 						GD.createAnd(getCommonStatesGD(rule1,rule2),
@@ -57,11 +61,21 @@ public class NondeterministicGoalGenerator extends GoalGenerator {
 						goals,
 						null// length
 						);
+				problems.add(problem);
 			}
 		}
 		return problems;
 	}
 
+	private boolean haveCommonStates(Rule rule1, Rule rule2) {
+		for (State s : afsm.states) {
+			if (s.outGoingRules.contains(rule1) && s.outGoingRules.contains(rule2)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	private GD getCommonStatesGD(Rule rule1, Rule rule2) {
 		List<GD> gds = new ArrayList<GD>();
 		for (State s : afsm.states) {
