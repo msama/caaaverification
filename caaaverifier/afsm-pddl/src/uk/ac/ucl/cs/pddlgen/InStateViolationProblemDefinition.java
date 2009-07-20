@@ -8,6 +8,7 @@ import java.util.List;
 
 import uk.ac.ucl.cs.afsm.common.AdaptationFiniteStateMachine;
 import uk.ac.ucl.cs.afsm.common.State;
+import uk.ac.ucl.cs.pddlgen.ebnf.GD;
 import uk.ac.ucl.cs.pddlgen.ebnf.Goal;
 import uk.ac.ucl.cs.pddlgen.ebnf.Name;
 import uk.ac.ucl.cs.pddlgen.ebnf.Problem;
@@ -16,13 +17,13 @@ import uk.ac.ucl.cs.pddlgen.ebnf.Problem;
  * @author rax
  *
  */
-public class ReachabilityProblemDefinition extends ProblemGenerator {
+public class InStateViolationProblemDefinition extends ProblemGenerator {
 
 	/**
 	 * @param afsm
 	 * @param parser
 	 */
-	public ReachabilityProblemDefinition(AdaptationFiniteStateMachine afsm,
+	public InStateViolationProblemDefinition(AdaptationFiniteStateMachine afsm,
 			AfsmParser parser) {
 		super(afsm, parser);
 		// TODO Auto-generated constructor stub
@@ -37,8 +38,9 @@ public class ReachabilityProblemDefinition extends ProblemGenerator {
 		
 		for (State state : afsm.states) {
 			
-			Goal goal = Goal.create(
-					parser.getStateGD(state));
+			Goal goal = Goal.create(GD.createAnd(
+					parser.getStateGD(state),
+					GD.createNot(parser.getInStateAssumptionGD(state))));
 			List<Goal> goals = new ArrayList<Goal>();
 			goals.add(goal);
 			
