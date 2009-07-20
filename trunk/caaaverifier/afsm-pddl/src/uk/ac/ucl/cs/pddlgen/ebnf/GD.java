@@ -135,11 +135,24 @@ public class GD extends Streamable {
 	}
 	
 	public static GD createAnd(GD... and) {
+		if (and.length == 0) {
+			throw new IllegalArgumentException("An and must contain at least an element.");
+		}else if (and.length == 1) {
+			// prevent ands with a single elements
+			return and[0];
+		}
 		GD gd = new GD();
 		gd.and = new ArrayList<GD>();
 		
 		for (GD g : and) {
-			gd.and.add(g);
+			// prevent ands of ands
+			if (g.expansion == Expansion.AND) {
+				for (GD nefew : g.and) {
+					gd.and.add(nefew);
+				}
+			} else {
+				gd.and.add(g);
+			}
 		}
 		
 		gd.expansion = Expansion.AND;
@@ -154,6 +167,13 @@ public class GD extends Streamable {
 	}
 	
 	public static GD createOr(GD... or) {
+		if (or.length == 0) {
+			throw new IllegalArgumentException("An or must contain at least an element.");
+		}else if (or.length == 1) {
+			// prevents or with a single element
+			return or[0];
+		}
+		
 		if (!Streamable.definedKeys.contains(RequireKey.DISJUNCTIVE_PRECONDITIONS)) {
 			throw new IllegalStateException("Statement not can only be used if " +
 					"<required-key> defines :disjunctive-preconditions.");
@@ -163,7 +183,14 @@ public class GD extends Streamable {
 		gd.or = new ArrayList<GD>();
 		
 		for (GD g : or) {
-			gd.or.add(g);
+			// prevent ands of ands
+			if (g.expansion == Expansion.OR) {
+				for (GD nefew : g.or) {
+					gd.or.add(nefew);
+				}
+			} else {
+				gd.or.add(g);
+			}
 		}
 		
 		gd.expansion = Expansion.OR;
@@ -171,6 +198,11 @@ public class GD extends Streamable {
 	}
 	
 	public static GD createNot(GD not) {
+		// Prevent double negations
+		if (not.expansion == Expansion.NOT) {
+			return not.not;
+		}
+		
 		if (!Streamable.definedKeys.contains(RequireKey.DISJUNCTIVE_PRECONDITIONS)) {
 			throw new IllegalStateException("Statement not can only be used if " +
 					"<required-key> defines :disjunctive-preconditions.");

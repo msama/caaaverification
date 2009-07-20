@@ -8,7 +8,11 @@ public abstract class Goal extends Streamable {
 			@Override
 			protected void printInternal() {
 				pw.print("(:goal ");
+				++alignment;
+				align();
 				writeInto(pw, gd);
+				--alignment;
+				align();
 				pw.print(")");
 			}
 			

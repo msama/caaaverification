@@ -48,6 +48,7 @@ public class Problem extends Streamable {
 		++alignment;
 		align();
 		pw.print("(:domain " + domainName + ")");
+		align();
 		if (requireDef != null) {
 			writeInto(pw, requireDef);
 			align();
@@ -64,12 +65,10 @@ public class Problem extends Streamable {
 			writeInto(pw, init);
 			align();
 		}
-		
 		for (Goal g : goals){
 			writeInto(pw, g);
 			align();
 		}
-		
 		if (lengthSpec != null) {
 			writeInto(pw, lengthSpec);
 			align();

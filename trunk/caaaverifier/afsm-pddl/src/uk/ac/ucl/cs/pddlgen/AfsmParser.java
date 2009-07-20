@@ -1,11 +1,12 @@
 package uk.ac.ucl.cs.pddlgen;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import phoneAdapter.PhoneAdapterAfsm;
 
@@ -16,9 +17,7 @@ import uk.ac.ucl.cs.afsm.common.State;
 import uk.ac.ucl.cs.afsm.common.predicate.Constant;
 import uk.ac.ucl.cs.afsm.common.predicate.Constrain;
 import uk.ac.ucl.cs.afsm.common.predicate.Operator;
-import uk.ac.ucl.cs.pddlgen.ebnf.ActionDef;
 import uk.ac.ucl.cs.pddlgen.ebnf.ActionDefBody;
-import uk.ac.ucl.cs.pddlgen.ebnf.ActionFunctor;
 import uk.ac.ucl.cs.pddlgen.ebnf.AtomicFormula;
 import uk.ac.ucl.cs.pddlgen.ebnf.AtomicFormulaSkeleton;
 import uk.ac.ucl.cs.pddlgen.ebnf.ConstantsDef;
@@ -29,7 +28,6 @@ import uk.ac.ucl.cs.pddlgen.ebnf.Effect;
 import uk.ac.ucl.cs.pddlgen.ebnf.ExtensionDef;
 import uk.ac.ucl.cs.pddlgen.ebnf.GD;
 import uk.ac.ucl.cs.pddlgen.ebnf.Literal;
-import uk.ac.ucl.cs.pddlgen.ebnf.MethodDef;
 import uk.ac.ucl.cs.pddlgen.ebnf.Name;
 import uk.ac.ucl.cs.pddlgen.ebnf.Predicate;
 import uk.ac.ucl.cs.pddlgen.ebnf.PredicatesDef;
@@ -74,6 +72,8 @@ public class AfsmParser {
 
 	private Predicate existPredicate;
 	
+	private Domain domain;
+	
 	/**
 	 * @param afsm
 	 */
@@ -81,12 +81,34 @@ public class AfsmParser {
 		this.afsm = afsm;
 		domainName = Name.create(afsm.getName());
 		requireDef = createRequireDef();
+		domain = parse();
 	}
 	
 	public static void main(String[] args) {
-		AfsmParser parser = new AfsmParser(new PhoneAdapterAfsm().getAdaptationFiniteStateMachine());
-		Domain domain = parser.parse();
-		domain.startWriting(System.out);
+		AdaptationFiniteStateMachine afsm = new PhoneAdapterAfsm().getAdaptationFiniteStateMachine();
+		AfsmParser parser = new AfsmParser(afsm);
+		parser.save("out");
+		
+		NondeterministicProblemGenerator nonDetGen = new NondeterministicProblemGenerator(afsm, parser);
+		nonDetGen.saveAll("out/nondet");
+	}
+	
+	public void save(String foldername) {
+		try {
+			File folder = new File(foldername);
+			folder.mkdirs();
+			folder = null;
+			PrintStream ps = new PrintStream(new File(foldername + "/" + domainName + ".pddl"));
+			print(ps);
+			ps.flush();
+			ps.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void print(PrintStream ps) {
+		domain.startWriting(ps);
 	}
 	
 	public Domain parse() {
@@ -190,7 +212,7 @@ public class AfsmParser {
 		vars.add(CONTEXT_VARIABLE);
 		
 		existPredicate = Predicate.create("exist");
-		createContextAtomicFormulaSkeleton(vars, existPredicate);
+		formulas.add(createContextAtomicFormulaSkeleton(vars, existPredicate));
 		predicates.put("exist", existPredicate);
 		
 		for (String name : afsm.variables.keySet()) {
