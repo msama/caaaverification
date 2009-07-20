@@ -79,4 +79,8 @@ public class Problem extends Streamable {
 		pw.print(')');
 	}
 
+	public Name getProblemName() {
+		return problemName;
+	}
+
 }
