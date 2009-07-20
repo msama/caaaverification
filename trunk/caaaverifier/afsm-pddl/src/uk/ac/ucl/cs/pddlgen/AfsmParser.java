@@ -91,6 +91,12 @@ public class AfsmParser {
 		
 		NondeterministicProblemGenerator nonDetGen = new NondeterministicProblemGenerator(afsm, parser);
 		nonDetGen.saveAll("out/nondet");
+		
+		RuleLivenessProblemDefinition ruleLiveness = new RuleLivenessProblemDefinition(afsm, parser);
+		ruleLiveness.saveAll("out/ruleLiv");
+		
+		ReachabilityProblemDefinition reachability = new ReachabilityProblemDefinition(afsm, parser);
+		reachability.saveAll("out/reach");
 	}
 	
 	public void save(String foldername) {
