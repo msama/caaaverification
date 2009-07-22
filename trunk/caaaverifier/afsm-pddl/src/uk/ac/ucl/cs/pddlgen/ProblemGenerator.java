@@ -10,7 +10,9 @@ import uk.ac.ucl.cs.afsm.common.AdaptationFiniteStateMachine;
 import uk.ac.ucl.cs.pddlgen.ebnf.Init;
 import uk.ac.ucl.cs.pddlgen.ebnf.Literal;
 import uk.ac.ucl.cs.pddlgen.ebnf.Name;
+import uk.ac.ucl.cs.pddlgen.ebnf.ObjectDeclaration;
 import uk.ac.ucl.cs.pddlgen.ebnf.Problem;
+import uk.ac.ucl.cs.pddlgen.ebnf.TypedList;
 
 public abstract class ProblemGenerator {
 
@@ -28,6 +30,13 @@ public abstract class ProblemGenerator {
 	}	
 	
 	public abstract List<Problem> createProblems();
+	
+	protected ObjectDeclaration createObject() {
+		TypedList<Name> typedList = null;
+		typedList = TypedList.create(AfsmParser.STATE_VARIABLE_NAME, AfsmParser.STATE_TYPE, typedList);
+		typedList = TypedList.create(AfsmParser.CONTEXT_VARIABLE_NAME, AfsmParser.CONTEXT_TYPE, typedList);
+		return ObjectDeclaration.create(typedList);
+	}
 	
 	public void save(Problem problem, String folderName) {
 		String filename = folderName + "/" + problem.getProblemName() + ".pddl";

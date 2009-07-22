@@ -47,20 +47,23 @@ public class AfsmParser {
 
 	private AdaptationFiniteStateMachine afsm;
 	
-	private static final String STATE = "state";
-	private static final String CONTEXT = "context";
+	public static final String STATE = "state";
+	public static final String CONTEXT = "context";
 	
-	private static final Name STATE_NAME = Name.create(STATE);
-	private static final Name CONTEXT_NAME = Name.create(CONTEXT);
+	public static final Name STATE_NAME = Name.create(STATE);
+	public static final Name CONTEXT_NAME = Name.create(CONTEXT);
 	
-	private static final Variable STATE_VARIABLE = Variable.create("s");
-	private static final Variable CONTEXT_VARIABLE = Variable.create("c");
+	public static final Name STATE_VARIABLE_NAME = Name.create("s");
+	public static final Name CONTEXT_VARIABLE_NAME = Name.create("c");
 	
-	private static final Type STATE_TYPE = Type.create(STATE_NAME);
-	private static final Type CONTEXT_TYPE = Type.create(CONTEXT_NAME);
+	public static final Variable STATE_VARIABLE = Variable.create(STATE_VARIABLE_NAME);
+	public static final Variable CONTEXT_VARIABLE = Variable.create(CONTEXT_VARIABLE_NAME);
+	
+	public static final Type STATE_TYPE = Type.create(STATE_NAME);
+	public static final Type CONTEXT_TYPE = Type.create(CONTEXT_NAME);
 
-	private static final Term STATE_TERM = Term.create(STATE_VARIABLE);
-	private static final Term CONTEXT_TERM = Term.create(CONTEXT_VARIABLE);
+	public static final Term STATE_TERM = Term.create(STATE_VARIABLE);
+	public static final Term CONTEXT_TERM = Term.create(CONTEXT_VARIABLE);
 	
 	private Name domainName;
 	
@@ -472,7 +475,7 @@ public class AfsmParser {
 	}
 	
 	public AtomicFormula<Name> getStateFormulaName(State s) {
-		return AtomicFormula.create(predicates.get(s.getName()), STATE_NAME);
+		return AtomicFormula.create(predicates.get(s.getName()), STATE_VARIABLE_NAME);
 	}
 	
 	public GD getStateGD(State s) {
@@ -484,6 +487,6 @@ public class AfsmParser {
 	}
 	
 	public AtomicFormula<Name> getContextFormulaName() {
-		return AtomicFormula.create(existPredicate, CONTEXT_NAME);
+		return AtomicFormula.create(existPredicate, CONTEXT_VARIABLE_NAME);
 	}
 }

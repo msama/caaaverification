@@ -54,7 +54,7 @@ public class NondeterministicProblemGenerator extends ProblemGenerator {
 						Name.create("Nondeterministic_"+rule1.getName() + "_" + rule2.getName()),
 						parser.getRequireDef(),
 						null, // Situation
-						null,//objectDeclaration,
+						createObject(),
 						createInit(),
 						goals,
 						null// length

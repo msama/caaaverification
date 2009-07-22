@@ -3,6 +3,7 @@
  */
 package uk.ac.ucl.cs.pddlgen.ebnf;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -25,6 +26,13 @@ public abstract class TypedList<T extends Streamable> extends Streamable {
 			}
 		};
 		return typedList;
+	}
+	
+	public static<K extends Streamable> TypedList<K> create(final K name, 
+			final Type type, final TypedList<K> tail) {
+		List<K> list = new ArrayList<K>();
+		list.add(name);
+		return TypedList.create(list, type, tail);
 	}
 	
 	public static<K extends Streamable> TypedList<K> create(final List<K> names, 
