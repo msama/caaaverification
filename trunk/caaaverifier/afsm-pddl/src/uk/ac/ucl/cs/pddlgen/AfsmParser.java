@@ -149,8 +149,6 @@ public class AfsmParser {
 	private RequireDef createRequireDef() {
 		List<RequireKey> keys = new ArrayList<RequireKey>();
 		keys.add(RequireKey.TYPING);
-		keys.add(RequireKey.CONSTRAINTS);
-		keys.add(RequireKey.PREFERENCES);
 		keys.add(RequireKey.DISJUNCTIVE_PRECONDITIONS);
 		Streamable.definedKeys.addAll(keys);
 		return RequireDef.create(keys);
@@ -208,7 +206,7 @@ public class AfsmParser {
 		
 		for (State state : afsm.states) {
 			String key = state.getName();
-			Predicate predicate = Predicate.create("is-state-" + key);
+			Predicate predicate = Predicate.create("is_state_" + key);
 
 			TypedList<Variable> typedList = TypedList.create(vars, STATE_TYPE, null);
 			AtomicFormulaSkeleton skeleton = AtomicFormulaSkeleton.create(predicate, typedList);
@@ -225,7 +223,7 @@ public class AfsmParser {
 		predicates.put("exist", existPredicate);
 		
 		for (String name : afsm.variables.keySet()) {
-			Predicate predicate = Predicate.create("is-true-" + name);
+			Predicate predicate = Predicate.create("is_true_" + name);
 			AtomicFormulaSkeleton skeleton = createContextAtomicFormulaSkeleton(vars,
 					predicate);
 			formulas.add(skeleton);

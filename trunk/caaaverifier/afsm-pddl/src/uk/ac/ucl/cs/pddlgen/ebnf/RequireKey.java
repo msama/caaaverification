@@ -17,8 +17,6 @@ public class RequireKey extends Streamable {
 	}
 
 	public static final RequireKey TYPING = new RequireKey("typing");
-	public static final RequireKey CONSTRAINTS = new RequireKey("constraints"); //????????????????
-	public static final RequireKey PREFERENCES = new RequireKey("preferences"); //????????????????
 	public static final RequireKey SAFETY_CONSTRAINTS = new RequireKey("safety-constraints");
 	public static final RequireKey EXPRESSION_EVALUATION = new RequireKey("expression-evaluation");
 	public static final RequireKey DOMAIN_AXIOMS = new RequireKey("domain-axioms");
