@@ -57,7 +57,9 @@ public class GD extends Streamable {
 	protected void printInternal() {
 		switch(expansion) {
 			case FORMULA:
+				pw.print("(");
 				writeInto(pw, formula);
+				pw.print(")");
 				break;
 			case AND:
 				pw.print("(and ");

@@ -48,7 +48,7 @@ public class ActionDefBody extends Streamable {
 		
 		if (preconditions != null) {
 			align();
-			pw.print(":preconditions ");
+			pw.print(":precondition ");
 			++alignment;
 			align();
 			writeInto(pw, preconditions);

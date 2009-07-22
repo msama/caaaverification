@@ -20,7 +20,7 @@ public class PredicatesDef extends Streamable {
 
 	@Override
 	protected void printInternal() {
-		pw.print("(:predicates-def");
+		pw.print("(:predicates");
 		++alignment;
 		for (AtomicFormulaSkeleton skeleton : atomicFormulaSkeletons) {
 			align();
