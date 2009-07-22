@@ -53,7 +53,7 @@ public class RuleLivenessProblemDefinition extends ProblemGenerator {
 					Name.create("RuleLiveness_"+rule.getName()),
 					parser.getRequireDef(),
 					null, // Situation
-					null,//objectDeclaration,
+					createObject(),
 					createInit(),
 					goals,
 					null// length

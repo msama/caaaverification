@@ -47,7 +47,7 @@ public class ReachabilityProblemDefinition extends ProblemGenerator {
 					Name.create("Reachability_" + state.getName()),
 					parser.getRequireDef(),
 					null, // Situation
-					null,//objectDeclaration,
+					createObject(),
 					createInit(),
 					goals,
 					null// length

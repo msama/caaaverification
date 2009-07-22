@@ -20,7 +20,7 @@ public class ObjectDeclaration extends Streamable {
 	
 	@Override
 	protected void printInternal() {
-		pw.print("(: objects ");
+		pw.print("(:objects ");
 		writeInto(pw, names);
 		pw.print(")");
 	}
