@@ -471,7 +471,7 @@ public class AfsmParser {
 	}
 	
 	public AtomicFormula<Term> getStateFormulaTerm(State s) {
-		return AtomicFormula.create(predicates.get(s.getName()), STATE_TERM);
+		return AtomicFormula.create(predicates.get(s.getName()), Term.create(STATE_VARIABLE_NAME));
 	}
 	
 	public AtomicFormula<Name> getStateFormulaName(State s) {
