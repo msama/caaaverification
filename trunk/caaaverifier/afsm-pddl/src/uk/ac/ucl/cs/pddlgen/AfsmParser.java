@@ -304,18 +304,11 @@ public class AfsmParser {
 			List<GD> unsatisfyPrec = new ArrayList<GD>();
 			
 			for (Constrain con : afsm.constrains) {
-				uk.ac.ucl.cs.afsm.common.predicate.Predicate requiree = con.requiree;
-				if (requiree.equals(v)) {
-					satisfyPrec.add(parsePredicate(con.required));
-				} else if (requiree instanceof Operator.Not) {
-					requiree = ((Operator.Not)requiree).getPredicate();
-					if (requiree.equals(v)) {
-						unsatisfyPrec.add(parsePredicate(con.required));
-					}
+				if (v.equals(con.requiree)) {
+					parseConstrainForPrecondition(con, satisfyPrec, unsatisfyPrec);
 				}
 			}
 			
-			Term t = Term.create(CONTEXT_VARIABLE);
 			GD satisfyPreconditions = null;
 			GD unsatisfyPreconditions = null;
 			if (satisfyPrec.size() > 0) {
@@ -336,32 +329,15 @@ public class AfsmParser {
 			List<Effect> satisfyEff = new ArrayList<Effect>();
 			List<Effect> unsatisfyEff = new ArrayList<Effect>();
 			
-			// TODO(rax): this is awful fix it
+			// Add constraints in the effect
 			for (Constrain con : afsm.constrains) {
-				uk.ac.ucl.cs.afsm.common.predicate.Predicate required = con.required;
-				if (required.equals(v)) {
-					if (con.requiree instanceof uk.ac.ucl.cs.afsm.common.predicate.Variable) {
-						uk.ac.ucl.cs.afsm.common.predicate.Variable var = (uk.ac.ucl.cs.afsm.common.predicate.Variable)con.requiree;
-						satisfyEff.add(Effect.createFormula(AtomicFormula.create(predicates.get(var.getName()), t)));
-					} else {
-						uk.ac.ucl.cs.afsm.common.predicate.Variable var = (uk.ac.ucl.cs.afsm.common.predicate.Variable)((Operator.Not)con.requiree).getPredicate();
-						satisfyEff.add(Effect.createFormula(AtomicFormula.create(predicates.get(var.getName()), t)));
-					}
-				} else if (required instanceof Operator.Not) {
-					required = ((Operator.Not)required).getPredicate();
-					if (required.equals(v)) {
-						if (con.requiree instanceof uk.ac.ucl.cs.afsm.common.predicate.Variable) {
-							uk.ac.ucl.cs.afsm.common.predicate.Variable var = (uk.ac.ucl.cs.afsm.common.predicate.Variable)con.requiree;
-							unsatisfyEff.add(Effect.createFormula(AtomicFormula.create(predicates.get(var.getName()), t)));
-						} else {
-							uk.ac.ucl.cs.afsm.common.predicate.Variable var = (uk.ac.ucl.cs.afsm.common.predicate.Variable)((Operator.Not)con.requiree).getPredicate();
-							unsatisfyEff.add(Effect.createNot(AtomicFormula.create(predicates.get(var.getName()), t)));
-						}
-					}
+				if (v.equals(con.required)) {
+					parseConstrainForEffect(con, satisfyEff, unsatisfyEff);
 				}
 			}
-			satisfyEff.add(Effect.createFormula(AtomicFormula.create(predicates.get(v.getName()), t)));
-			unsatisfyEff.add(Effect.createNot(AtomicFormula.create(predicates.get(v.getName()), t)));
+			
+			satisfyEff.add(Effect.createFormula(AtomicFormula.create(predicates.get(v.getName()), CONTEXT_TERM)));
+			unsatisfyEff.add(Effect.createNot(AtomicFormula.create(predicates.get(v.getName()), CONTEXT_TERM)));
 			
 			Effect satisfyEffect = Effect.createAnd(satisfyEff.toArray(new Effect[satisfyEff.size()]));
 			Effect unsatisfyEffect = Effect.createAnd(unsatisfyEff.toArray(new Effect[unsatisfyEff.size()]));
@@ -379,6 +355,72 @@ public class AfsmParser {
 		return defs;
 	}
 
+	private void parseConstrainForEffect(Constrain con,
+			List<Effect> satisfyEff, List<Effect> unsatisfyEff) {
+		if (con instanceof Constrain.AThenB) {
+			parseConstrainForEffect((Constrain.AThenB)con, satisfyEff, unsatisfyEff);
+		} else if (con instanceof Constrain.AThenNotB) {
+			parseConstrainForEffect((Constrain.AThenNotB)con, satisfyEff, unsatisfyEff);
+		}  else if (con instanceof Constrain.NotAThenB) {
+			parseConstrainForEffect((Constrain.NotAThenB)con, satisfyEff, unsatisfyEff);
+		} else if (con instanceof Constrain.NotAThenNotB) {
+			parseConstrainForEffect((Constrain.NotAThenNotB)con, satisfyEff, unsatisfyEff);
+		}
+	}
+	
+	private void parseConstrainForEffect(Constrain.AThenB con,
+			List<Effect> satisfyEff, List<Effect> unsatisfyEff) {
+		satisfyEff.add(Effect.createFormula(AtomicFormula.create(predicates.get(con.requiree.getName()), CONTEXT_TERM)));
+	}
+	
+	private void parseConstrainForEffect(Constrain.AThenNotB con,
+			List<Effect> satisfyEff, List<Effect> unsatisfyEff) {
+		satisfyEff.add(Effect.createNot(AtomicFormula.create(predicates.get(con.requiree.getName()), CONTEXT_TERM)));
+	}
+	
+	private void parseConstrainForEffect(Constrain.NotAThenB con,
+			List<Effect> satisfyEff, List<Effect> unsatisfyEff) {
+		unsatisfyEff.add(Effect.createFormula(AtomicFormula.create(predicates.get(con.requiree.getName()), CONTEXT_TERM)));
+	}
+	
+	private void parseConstrainForEffect(Constrain.NotAThenNotB con,
+			List<Effect> satisfyEff, List<Effect> unsatisfyEff) {
+		unsatisfyEff.add(Effect.createNot(AtomicFormula.create(predicates.get(con.requiree.getName()), CONTEXT_TERM)));
+	}
+	
+	private void parseConstrainForPrecondition(Constrain con,
+			List<GD> satisfyPrec, List<GD> unsatisfyPrec) {
+		if (con instanceof Constrain.AThenB) {
+			parseConstrainForPrecondition((Constrain.AThenB)con, satisfyPrec, unsatisfyPrec);
+		} else if (con instanceof Constrain.AThenNotB) {
+			parseConstrainForPrecondition((Constrain.AThenNotB)con, satisfyPrec, unsatisfyPrec);
+		}  else if (con instanceof Constrain.NotAThenB) {
+			parseConstrainForPrecondition((Constrain.NotAThenB)con, satisfyPrec, unsatisfyPrec);
+		} else if (con instanceof Constrain.NotAThenNotB) {
+			parseConstrainForPrecondition((Constrain.NotAThenNotB)con, satisfyPrec, unsatisfyPrec);
+		}
+	}
+
+	private void parseConstrainForPrecondition(Constrain.AThenB con,
+			List<GD> satisfyPrec, List<GD> unsatisfyPrec) {
+		satisfyPrec.add(parsePredicate(con.required));
+	}
+	
+	private void parseConstrainForPrecondition(Constrain.AThenNotB con,
+			List<GD> satisfyPrec, List<GD> unsatisfyPrec) {
+		satisfyPrec.add(GD.createNot(parsePredicate(con.required)));
+	}
+
+	private void parseConstrainForPrecondition(Constrain.NotAThenB con,
+			List<GD> satisfyPrec, List<GD> unsatisfyPrec) {
+		unsatisfyPrec.add(parsePredicate(con.required));
+	}
+	
+	private void parseConstrainForPrecondition(Constrain.NotAThenNotB con,
+			List<GD> satisfyPrec, List<GD> unsatisfyPrec) {
+		unsatisfyPrec.add(GD.createNot(parsePredicate(con.required)));
+	}
+	
 	public static TypedList<Variable> createStateContextTypedList() {
 		TypedList<Variable> typedList = null;
 		

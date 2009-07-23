@@ -160,7 +160,7 @@ public abstract class ActionSpec extends Streamable {
 	}
 	
 	public static ActionSpec create(final TypedList<Variable> var, final GD gd, final ActionSpec spec) {
-		if (!RequireKey.definedKeys.contains(RequireKey.FOREACH_EXPANSION)) {
+		if (!RequireKey.definedKeys.contains(RequireKey.FOREACH_EXPANSIONS)) {
 			throw new IllegalArgumentException("FOREACH_EXPANSION required.");
 		}
 		
@@ -193,7 +193,7 @@ public abstract class ActionSpec extends Streamable {
 	}
 	
 	public static ActionSpec createConstrained(final ActionSpec[] specs, final ActionConstraint[] constraints) {
-		if (!RequireKey.definedKeys.contains(RequireKey.FOREACH_EXPANSION)) {
+		if (!RequireKey.definedKeys.contains(RequireKey.FOREACH_EXPANSIONS)) {
 			throw new IllegalArgumentException("DAG_EXPANSION required.");
 		}
 		
