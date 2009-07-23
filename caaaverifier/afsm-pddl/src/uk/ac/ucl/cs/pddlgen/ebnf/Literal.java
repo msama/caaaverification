@@ -24,11 +24,11 @@ public class Literal<T extends Streamable> extends Streamable {
 				break;
 			case NOT:
 				pw.print("(not");
-				++alignment;
-				align();
+				//++alignment;
+				//align();
 				writeInto(pw, formula);
-				--alignment;
-				align();
+				//--alignment;
+				//align();
 				pw.print(")");
 		}
 	}

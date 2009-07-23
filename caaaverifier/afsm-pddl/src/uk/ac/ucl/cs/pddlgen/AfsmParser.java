@@ -488,7 +488,14 @@ public class AfsmParser {
 		return parsePredicate(s.getInStateAssumption(), Term.create(STATE_VARIABLE_NAME));
 	}
 	
-	public AtomicFormula<Name> createContextFormulaForProblem() {
-		return AtomicFormula.create(existPredicate, CONTEXT_VARIABLE_NAME);
+	public List<Literal<Name>> createInitiContextLiteralsForProblem() {
+		List<Literal<Name>> list = new ArrayList<Literal<Name>>();
+		list.add(Literal.createFormula(AtomicFormula.create(existPredicate, CONTEXT_VARIABLE_NAME)));
+		for (String key : afsm.variables.keySet()) {
+			Predicate p = predicates.get(key);
+			AtomicFormula<Name> f = AtomicFormula.create(p, CONTEXT_VARIABLE_NAME);
+			list.add(Literal.createNot(f));
+		}
+		return list;
 	}
 }

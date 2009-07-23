@@ -122,9 +122,7 @@ public abstract class Streamable {
 		++alignment;
 		for (K s : list) {
 			align();
-			//pw.print("(");
 			writeInto(pw, s);
-			//pw.print(")");
 		}
 		--alignment;
 		align();
