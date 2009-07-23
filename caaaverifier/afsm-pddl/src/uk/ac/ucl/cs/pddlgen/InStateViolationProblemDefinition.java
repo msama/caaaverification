@@ -41,12 +41,12 @@ public class InStateViolationProblemDefinition extends ProblemGenerator {
 			GD assumption = null;
 			try {
 				// Skip states without any assumptions.
-				assumption = parser.getInStateAssumptionGD(state);
+				assumption = parser.createInStateAssumptionGDForProblem(state);
 			} catch (IllegalStateException ex) {
 				continue;
 			}
 			Goal goal = Goal.create(GD.createAnd(
-					parser.getStateGD(state),
+					parser.createStateGDForProblem(state),
 					GD.createNot(assumption)));
 			List<Goal> goals = new ArrayList<Goal>();
 			goals.add(goal);

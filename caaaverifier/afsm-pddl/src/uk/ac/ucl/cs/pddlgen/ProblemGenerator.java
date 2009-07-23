@@ -64,9 +64,9 @@ public abstract class ProblemGenerator {
 	protected Init createInit() {
 		List<Literal<Name>> list = new ArrayList<Literal<Name>>();
 		// Initial state
-		list.add(Literal.createFormula(parser.getStateFormulaName(afsm.getInitialState())));
+		list.add(Literal.createFormula(parser.createStateFormulaForProblem(afsm.getInitialState())));
 		// Context
-		list.add(Literal.createFormula(parser.getContextFormulaName()));
+		list.add(Literal.createFormula(parser.createContextFormulaForProblem()));
 		return Init.create(list);
 	}
 }
