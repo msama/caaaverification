@@ -62,9 +62,9 @@ public abstract class Effect extends Streamable {
 				pw.print("(not ");
 				//++alignment;
 				//align();
-				pw.print("(");
+				//pw.print("(");
 				writeInto(pw, formula);
-				pw.print(")");
+				//pw.print(")");
 				//--alignment;
 				//align();
 				pw.print(")");
@@ -81,9 +81,9 @@ public abstract class Effect extends Streamable {
 		
 		Effect effect = new Effect(){ 
 			protected void printInternal() {
-				pw.print("(");
+				//pw.print("(");
 				writeInto(pw, formula);
-				pw.print(")");
+				//pw.print(")");
 			}
 		};
 		return effect;

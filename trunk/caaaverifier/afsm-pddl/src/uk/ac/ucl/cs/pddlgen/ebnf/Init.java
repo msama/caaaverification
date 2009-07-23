@@ -23,15 +23,25 @@ public class Init extends Streamable {
 	
 	@Override
 	protected void printInternal() {
+		boolean align = literals.size() > 1;
+		
 		pw.print("(:init ");
 		int i = 0;
+		if (align) {
+			++alignment;
+		}
 		for (Literal<Name> literal : literals) {
-			pw.print("(");
 			writeInto(pw, literal);
-			pw.print(")");
 			if (++i < literals.size()) {
-				pw.print(" ");
+				if (align) {
+					align();
+				} else {
+					pw.print(" ");
+				}
 			}
+		}
+		if (align) {
+			--alignment;
 		}
 		pw.print(")");
 	}
