@@ -38,7 +38,7 @@ public class ReachabilityProblemDefinition extends ProblemGenerator {
 		for (State state : afsm.states) {
 			
 			Goal goal = Goal.create(
-					parser.getStateGD(state));
+					parser.createStateGDForProblem(state));
 			List<Goal> goals = new ArrayList<Goal>();
 			goals.add(goal);
 			

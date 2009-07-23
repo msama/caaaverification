@@ -409,29 +409,33 @@ public class AfsmParser {
 	}
 	
 	private GD parsePredicate(uk.ac.ucl.cs.afsm.common.predicate.Predicate predicate) {
+		return parsePredicate(predicate, CONTEXT_TERM);
+	}
+	
+	private GD parsePredicate(uk.ac.ucl.cs.afsm.common.predicate.Predicate predicate, Term term) {
 		if (predicate == Constant.TRUE) {
 			throw new IllegalStateException("True not defined: " + predicate);
 		} else if (predicate == Constant.FALSE) {
 			throw new IllegalStateException("False not defined: " + predicate);
 		} if (predicate instanceof uk.ac.ucl.cs.afsm.common.predicate.Variable) {
 			uk.ac.ucl.cs.afsm.common.predicate.Variable v = (uk.ac.ucl.cs.afsm.common.predicate.Variable)predicate;
-			AtomicFormula<Term> formula = AtomicFormula.create(predicates.get(v.getName()), CONTEXT_TERM);
+			AtomicFormula<Term> formula = AtomicFormula.create(predicates.get(v.getName()), term);
 			return GD.createFormula(formula);
 		} else if (predicate instanceof Operator.Not) {
 			Operator.Not not = (Operator.Not) predicate;
-			return GD.createNot(parsePredicate(not.getPredicate()));
+			return GD.createNot(parsePredicate(not.getPredicate(), term));
 		} else if (predicate instanceof Operator.And) {
 			Operator.And and = (Operator.And) predicate;
 			GD[] andGd = new GD[and.size()];
 			for (int i = 0; i < and.size(); i++) {
-				andGd[i] = parsePredicate(and.get(i));
+				andGd[i] = parsePredicate(and.get(i), term);
 			}
 			return GD.createAnd(andGd);
 		} else if (predicate instanceof Operator.Or) {
 			Operator.Or or = (Operator.Or) predicate;
 			GD[] orGd = new GD[or.size()];
 			for (int i = 0; i < or.size(); i++) {
-				orGd[i] = parsePredicate(or.get(i));
+				orGd[i] = parsePredicate(or.get(i), term);
 			}
 			return GD.createOr(orGd);
 		}
@@ -466,27 +470,25 @@ public class AfsmParser {
 		return requireDef;
 	}
 
-	public GD getRuleGD(Rule rule) {
-		return ruleTriggersGD.get(rule);
+	public GD createRuleGDForProblem(Rule rule) {
+		//return ruleTriggersGD.get(rule);
+		return parsePredicate(rule.getTrigger(), Term.create(CONTEXT_VARIABLE_NAME));
 	}
 	
-	public AtomicFormula<Term> getStateFormulaTerm(State s) {
-		return AtomicFormula.create(predicates.get(s.getName()), Term.create(STATE_VARIABLE_NAME));
-	}
-	
-	public AtomicFormula<Name> getStateFormulaName(State s) {
+	public AtomicFormula<Name> createStateFormulaForProblem(State s) {
 		return AtomicFormula.create(predicates.get(s.getName()), STATE_VARIABLE_NAME);
 	}
 	
-	public GD getStateGD(State s) {
-		return GD.createFormula(getStateFormulaTerm(s));
+	public GD createStateGDForProblem(State s) {
+		AtomicFormula<Term> formula = AtomicFormula.create(predicates.get(s.getName()), Term.create(STATE_VARIABLE_NAME));
+		return GD.createFormula(formula);
 	}
 	
-	public GD getInStateAssumptionGD(State s) {
-		return parsePredicate(s.getInStateAssumption());
+	public GD createInStateAssumptionGDForProblem(State s) {
+		return parsePredicate(s.getInStateAssumption(), Term.create(STATE_VARIABLE_NAME));
 	}
 	
-	public AtomicFormula<Name> getContextFormulaName() {
+	public AtomicFormula<Name> createContextFormulaForProblem() {
 		return AtomicFormula.create(existPredicate, CONTEXT_VARIABLE_NAME);
 	}
 }

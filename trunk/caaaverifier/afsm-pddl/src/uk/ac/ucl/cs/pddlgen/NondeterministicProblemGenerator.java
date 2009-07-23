@@ -44,8 +44,8 @@ public class NondeterministicProblemGenerator extends ProblemGenerator {
 				
 				Goal goal = Goal.create(
 						GD.createAnd(getCommonStatesGD(rule1,rule2),
-								parser.getRuleGD(rule1), 
-								parser.getRuleGD(rule2)));
+								parser.createRuleGDForProblem(rule1), 
+								parser.createRuleGDForProblem(rule2)));
 				List<Goal> goals = new ArrayList<Goal>();
 				goals.add(goal);
 				
@@ -78,7 +78,7 @@ public class NondeterministicProblemGenerator extends ProblemGenerator {
 		List<GD> gds = new ArrayList<GD>();
 		for (State s : afsm.states) {
 			if (s.outGoingRules.contains(rule1) && s.outGoingRules.contains(rule2)) {
-				gds.add(parser.getStateGD(s));
+				gds.add(parser.createStateGDForProblem(s));
 			}
 		}
 		return GD.createAnd(gds.toArray(new GD[gds.size()]));
