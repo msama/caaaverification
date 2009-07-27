@@ -3,9 +3,6 @@
  */
 package phoneAdapter;
 
-import static uk.ac.ucl.cs.afsm.common.Assignment.negate;
-import static uk.ac.ucl.cs.afsm.common.Assignment.satisfy;
-import static uk.ac.ucl.cs.afsm.common.Assignment.*;
 import static uk.ac.ucl.cs.afsm.common.predicate.Operator.*;
 
 import uk.ac.ucl.cs.afsm.common.AdaptationFiniteStateMachine;
