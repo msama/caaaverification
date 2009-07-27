@@ -151,6 +151,7 @@ public class AfsmParser {
 	 */
 	private RequireDef createRequireDef() {
 		List<RequireKey> keys = new ArrayList<RequireKey>();
+		keys.add(RequireKey.STRIPS);
 		keys.add(RequireKey.TYPING);
 		keys.add(RequireKey.DISJUNCTIVE_PRECONDITIONS);
 		Streamable.definedKeys.addAll(keys);
@@ -451,10 +452,18 @@ public class AfsmParser {
 	}
 	
 	private GD parsePredicate(uk.ac.ucl.cs.afsm.common.predicate.Predicate predicate) {
-		return parsePredicate(predicate, CONTEXT_TERM);
+		return parsePredicate(predicate, CONTEXT_TERM, false);
 	}
 	
-	private GD parsePredicate(uk.ac.ucl.cs.afsm.common.predicate.Predicate predicate, Term term) {
+	/**
+	 * Goal definitions do not support disjunctions. ORs are replaced with NOT(AND(NOT(a), NOT(b), ...))
+	 * 
+	 * @param predicate
+	 * @param term
+	 * @param deMorgan
+	 * @return
+	 */
+	private GD parsePredicate(uk.ac.ucl.cs.afsm.common.predicate.Predicate predicate, Term term, boolean deMorgan) {
 		if (predicate == Constant.TRUE) {
 			throw new IllegalStateException("True not defined: " + predicate);
 		} else if (predicate == Constant.FALSE) {
@@ -465,21 +474,29 @@ public class AfsmParser {
 			return GD.createFormula(formula);
 		} else if (predicate instanceof Operator.Not) {
 			Operator.Not not = (Operator.Not) predicate;
-			return GD.createNot(parsePredicate(not.getPredicate(), term));
+			return GD.createNot(parsePredicate(not.getPredicate(), term, deMorgan));
 		} else if (predicate instanceof Operator.And) {
 			Operator.And and = (Operator.And) predicate;
 			GD[] andGd = new GD[and.size()];
 			for (int i = 0; i < and.size(); i++) {
-				andGd[i] = parsePredicate(and.get(i), term);
+				andGd[i] = parsePredicate(and.get(i), term, deMorgan);
 			}
 			return GD.createAnd(andGd);
 		} else if (predicate instanceof Operator.Or) {
 			Operator.Or or = (Operator.Or) predicate;
 			GD[] orGd = new GD[or.size()];
-			for (int i = 0; i < or.size(); i++) {
-				orGd[i] = parsePredicate(or.get(i), term);
+			if (!deMorgan) {
+				
+				for (int i = 0; i < or.size(); i++) {
+					orGd[i] = parsePredicate(or.get(i), term, deMorgan);
+				}
+				return GD.createOr(orGd);
+			} else {
+				for (int i = 0; i < or.size(); i++) {
+					orGd[i] = GD.createNot(parsePredicate(or.get(i), term, deMorgan));
+				}
+				return GD.createNot(GD.createAnd(orGd));
 			}
-			return GD.createOr(orGd);
 		}
 		throw new IllegalStateException(
 				"This method should have already returned a value: " + predicate);
@@ -514,7 +531,7 @@ public class AfsmParser {
 
 	public GD createRuleGDForProblem(Rule rule) {
 		//return ruleTriggersGD.get(rule);
-		return parsePredicate(rule.getTrigger(), Term.create(CONTEXT_VARIABLE_NAME));
+		return parsePredicate(rule.getTrigger(), Term.create(CONTEXT_VARIABLE_NAME), true);
 	}
 	
 	public AtomicFormula<Name> createStateFormulaForProblem(State s) {
@@ -527,7 +544,7 @@ public class AfsmParser {
 	}
 	
 	public GD createInStateAssumptionGDForProblem(State s) {
-		return parsePredicate(s.getInStateAssumption(), Term.create(STATE_VARIABLE_NAME));
+		return parsePredicate(s.getInStateAssumption(), Term.create(STATE_VARIABLE_NAME), true);
 	}
 	
 	public List<Literal<Name>> createInitiContextLiteralsForProblem() {

@@ -42,11 +42,13 @@ public class RuleLivenessProblemDefinition extends ProblemGenerator {
 				continue;
 			}
 			
-			Goal goal = Goal.create(
-					GD.createAnd(getStatesGD(rule),
-					parser.createRuleGDForProblem(rule)));
 			List<Goal> goals = new ArrayList<Goal>();
-			goals.add(goal);
+			GD ruleDG = parser.createRuleGDForProblem(rule);
+			List<GD> states = getStatesGD(rule);
+			for (GD state : states) {
+				Goal goal = Goal.create(GD.createAnd(state,ruleDG));
+				goals.add(goal);
+			}
 			
 			Problem problem = new Problem(
 					parser.getDomainName(), 
@@ -72,13 +74,13 @@ public class RuleLivenessProblemDefinition extends ProblemGenerator {
 		return false;
 	}
 	
-	private GD getStatesGD(Rule rule) {
+	private List<GD> getStatesGD(Rule rule) {
 		List<GD> gds = new ArrayList<GD>();
 		for (State s : afsm.states) {
 			if (s.outGoingRules.contains(rule)) {
 				gds.add(parser.createStateGDForProblem(s));
 			}
 		}
-		return GD.createAnd(gds.toArray(new GD[gds.size()]));
+		return gds;
 	}
 }
