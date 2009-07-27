@@ -23,7 +23,7 @@ public class Literal<T extends Streamable> extends Streamable {
 				writeInto(pw, formula);
 				break;
 			case NOT:
-				pw.print("(not");
+				pw.print("(not ");
 				//++alignment;
 				//align();
 				writeInto(pw, formula);

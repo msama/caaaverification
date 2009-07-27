@@ -42,6 +42,7 @@ public class Init extends Streamable {
 		}
 		if (align) {
 			--alignment;
+			align();
 		}
 		pw.print(")");
 	}
