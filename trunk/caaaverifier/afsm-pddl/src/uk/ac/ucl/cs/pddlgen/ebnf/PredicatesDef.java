@@ -44,4 +44,6 @@ public class PredicatesDef extends Streamable {
 		predicates.atomicFormulaSkeletons = atomicFormulaSkeletons;
 		return predicates;
 	}
+	
+	
 }
