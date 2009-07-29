@@ -11,8 +11,8 @@ public class Predicate extends Streamable {
 
 	Name name;
 
-	private Predicate() {
-		
+	private Predicate(Name name) {
+		this.name = name;
 	}
 
 	/* (non-Javadoc)
@@ -31,8 +31,13 @@ public class Predicate extends Streamable {
 		if (name == null) {
 			throw new IllegalArgumentException("Statement <predicate> must have a <name>.");
 		}
-		Predicate predicate = new Predicate();
-		predicate.name = name;
-		return predicate;
+		return new Predicate(name);
+	}
+	
+	public static Predicate createEquals() {
+		if (!definedKeys.contains(RequireKey.EQUALITY)) {
+			throw new IllegalStateException("'=' requires equalities.");
+		}
+		return new Predicate(Name.create("="));
 	}
 }

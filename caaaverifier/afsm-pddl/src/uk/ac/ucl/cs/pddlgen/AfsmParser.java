@@ -49,21 +49,27 @@ public class AfsmParser {
 	
 	public static final String STATE = "state";
 	public static final String CONTEXT = "context";
+	public static final String PRIORITY = "priority";
 	
 	public static final Name STATE_NAME = Name.create(STATE);
 	public static final Name CONTEXT_NAME = Name.create(CONTEXT);
+	public static final Name PRIORITY_NAME = Name.create(PRIORITY);
 	
 	public static final Name STATE_VARIABLE_NAME = Name.create("s");
 	public static final Name CONTEXT_VARIABLE_NAME = Name.create("c");
+	public static final Name PRIORITY_VARIABLE_NAME = Name.create("p");
 	
 	public static final Variable STATE_VARIABLE = Variable.create(STATE_VARIABLE_NAME);
 	public static final Variable CONTEXT_VARIABLE = Variable.create(CONTEXT_VARIABLE_NAME);
+	public static final Variable PRIORITY_VARIABLE = Variable.create(PRIORITY_VARIABLE_NAME);
 	
 	public static final Type STATE_TYPE = Type.create(STATE_NAME);
 	public static final Type CONTEXT_TYPE = Type.create(CONTEXT_NAME);
+	public static final Type PRIORITY_TYPE = Type.create(PRIORITY_NAME);
 
 	public static final Term STATE_TERM = Term.create(STATE_VARIABLE);
 	public static final Term CONTEXT_TERM = Term.create(CONTEXT_VARIABLE);
+	public static final Term PRIORITY_TERM = Term.create(PRIORITY_VARIABLE);
 	
 	private Name domainName;
 	
@@ -153,6 +159,7 @@ public class AfsmParser {
 		List<RequireKey> keys = new ArrayList<RequireKey>();
 		keys.add(RequireKey.STRIPS);
 		keys.add(RequireKey.TYPING);
+		keys.add(RequireKey.EQUALITY);
 		keys.add(RequireKey.DISJUNCTIVE_PRECONDITIONS);
 		Streamable.definedKeys.addAll(keys);
 		return RequireDef.create(keys);
@@ -168,7 +175,6 @@ public class AfsmParser {
 	 */
 	private TypesDef createTypesDef() {
 		List<Name> names = new ArrayList<Name>();
-		names.add(STATE_NAME);
 		names.add(CONTEXT_NAME);
 		
 		TypedList<Name> types = TypedList.create(names);
@@ -184,8 +190,10 @@ public class AfsmParser {
 	
 	private DomainVarsDef createDomainVarsDef() {
 		List<DomainVarDeclaration> names = new ArrayList<DomainVarDeclaration>();
+		names.add(DomainVarDeclaration.create(STATE_NAME));
+		names.add(DomainVarDeclaration.create(PRIORITY_NAME));
+		
 		TypedList<DomainVarDeclaration> vars = TypedList.create(names);
-		// TODO(rax): add requirements
 		return DomainVarsDef.create(vars);
 	}
 	
@@ -222,9 +230,9 @@ public class AfsmParser {
 		vars = new ArrayList<Variable>();
 		vars.add(CONTEXT_VARIABLE);
 		
-		existPredicate = Predicate.create("exist");
-		formulas.add(createContextAtomicFormulaSkeleton(vars, existPredicate));
-		predicates.put("exist", existPredicate);
+		//existPredicate = Predicate.create("exist");
+		//formulas.add(createContextAtomicFormulaSkeleton(vars, existPredicate));
+		//predicates.put("exist", existPredicate);
 		
 		for (String name : afsm.variables.keySet()) {
 			Predicate predicate = Predicate.create("is_true_" + name);
@@ -268,7 +276,7 @@ public class AfsmParser {
 		
 		// Add an action for each Rule
 		for (Rule rule : afsm.rules) {
-			TypedList<Variable> typedList = createStateContextTypedList();
+			TypedList<Variable> typedList = createPriorityStateContextTypedList();
 			
 			GD trigger = parsePredicate(rule.getTrigger());
 			ruleTriggersGD.put(rule, trigger);
@@ -422,7 +430,7 @@ public class AfsmParser {
 		unsatisfyPrec.add(GD.createNot(parsePredicate(con.required)));
 	}
 	
-	public static TypedList<Variable> createStateContextTypedList() {
+	public static TypedList<Variable> createPriorityStateContextTypedList() {
 		TypedList<Variable> typedList = null;
 		
 		// Add vontext
@@ -430,6 +438,10 @@ public class AfsmParser {
 		
 		// Add state as a variable
 		typedList = createTypedList(STATE_VARIABLE, STATE_TYPE, typedList);
+		
+		// Add priority
+		typedList = createTypedList(PRIORITY_VARIABLE, PRIORITY_TYPE, typedList);
+		
 		return typedList;
 	}
 	
@@ -507,6 +519,7 @@ public class AfsmParser {
 		for (State s : afsm.states) {
 			if (s.outGoingRules.contains(r)) {
 				AtomicFormula<Term> formula = AtomicFormula.create(predicates.get(s.getName()), STATE_TERM);
+				
 				states.add(GD.createFormula(formula));
 			}
 		}
