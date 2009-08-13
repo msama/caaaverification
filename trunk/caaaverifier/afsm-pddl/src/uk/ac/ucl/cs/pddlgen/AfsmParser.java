@@ -22,22 +22,17 @@ import uk.ac.ucl.cs.pddlgen.ebnf.AtomicFormula;
 import uk.ac.ucl.cs.pddlgen.ebnf.AtomicFormulaSkeleton;
 import uk.ac.ucl.cs.pddlgen.ebnf.ConstantsDef;
 import uk.ac.ucl.cs.pddlgen.ebnf.Domain;
-import uk.ac.ucl.cs.pddlgen.ebnf.DomainVarDeclaration;
-import uk.ac.ucl.cs.pddlgen.ebnf.DomainVarsDef;
 import uk.ac.ucl.cs.pddlgen.ebnf.Effect;
-import uk.ac.ucl.cs.pddlgen.ebnf.ExtensionDef;
 import uk.ac.ucl.cs.pddlgen.ebnf.GD;
 import uk.ac.ucl.cs.pddlgen.ebnf.Literal;
 import uk.ac.ucl.cs.pddlgen.ebnf.Name;
-import uk.ac.ucl.cs.pddlgen.ebnf.Predicate;
+import uk.ac.ucl.cs.pddlgen.ebnf.FunctionSymbol;
 import uk.ac.ucl.cs.pddlgen.ebnf.PredicatesDef;
 import uk.ac.ucl.cs.pddlgen.ebnf.RequireDef;
 import uk.ac.ucl.cs.pddlgen.ebnf.RequireKey;
-import uk.ac.ucl.cs.pddlgen.ebnf.SafetyDef;
 import uk.ac.ucl.cs.pddlgen.ebnf.Streamable;
 import uk.ac.ucl.cs.pddlgen.ebnf.StructureDef;
 import uk.ac.ucl.cs.pddlgen.ebnf.Term;
-import uk.ac.ucl.cs.pddlgen.ebnf.TimelessDef;
 import uk.ac.ucl.cs.pddlgen.ebnf.Type;
 import uk.ac.ucl.cs.pddlgen.ebnf.TypedList;
 import uk.ac.ucl.cs.pddlgen.ebnf.TypesDef;
@@ -75,11 +70,11 @@ public class AfsmParser {
 	
 	private RequireDef requireDef;
 	
-	private Map<String, Predicate> predicates = new HashMap<String, Predicate>();
+	private Map<String, FunctionSymbol> functionSymbols = new HashMap<String, FunctionSymbol>();
 	
 	private Map<Rule, GD> ruleTriggersGD = new HashMap<Rule, GD>();
 
-	private Predicate existPredicate;
+	private FunctionSymbol existPredicate;
 	
 	private Domain domain;
 	
@@ -132,22 +127,12 @@ public class AfsmParser {
 	public Domain parse() {
 		Domain domain = Domain.create(
 				domainName,
-				null, //createExtensionDef(),
 				requireDef,//createRequireDef(), 
 				createTypesDef(), 
 				null, //createConstantsDef(), 
-				null, //createDomainVarsDef(), 
 				createPredicatesDef(), 
-				null, //createTimelessDef(), 
-				null, //safetyDef, 
 				createStructureDefs());
 		return domain;
-	}
-	
-	private ExtensionDef createExtensionDef() {
-		List<Name> names = new ArrayList<Name>();
-		// TODO(rax): add extensions
-		return ExtensionDef.create(names);
 	}
 	
 	/**
@@ -183,18 +168,10 @@ public class AfsmParser {
 	
 	private ConstantsDef createConstantsDef() {
 		List<Name> names = new ArrayList<Name>();
+		names.add(STATE_NAME);
+		names.add(CONTEXT_NAME);
 		TypedList<Name> types = TypedList.create(names);
-		// TODO(rax): add requirements
 		return ConstantsDef.create(types);
-	}
-	
-	private DomainVarsDef createDomainVarsDef() {
-		List<DomainVarDeclaration> names = new ArrayList<DomainVarDeclaration>();
-		names.add(DomainVarDeclaration.create(STATE_NAME));
-		names.add(DomainVarDeclaration.create(PRIORITY_NAME));
-		
-		TypedList<DomainVarDeclaration> vars = TypedList.create(names);
-		return DomainVarsDef.create(vars);
 	}
 	
 	/**
@@ -218,12 +195,12 @@ public class AfsmParser {
 		
 		for (State state : afsm.states) {
 			String key = state.getName();
-			Predicate predicate = Predicate.create("is_state_" + key);
+			FunctionSymbol functionSymbol = FunctionSymbol.create("is_state_" + key);
 
 			TypedList<Variable> typedList = TypedList.create(vars, STATE_TYPE, null);
-			AtomicFormulaSkeleton skeleton = AtomicFormulaSkeleton.create(predicate, typedList);
+			AtomicFormulaSkeleton skeleton = AtomicFormulaSkeleton.create(functionSymbol, typedList);
 			formulas.add(skeleton);
-			predicates.put(key, predicate);
+			functionSymbols.put(key, functionSymbol);
 		}
 		
 
@@ -235,32 +212,23 @@ public class AfsmParser {
 		//predicates.put("exist", existPredicate);
 		
 		for (String name : afsm.variables.keySet()) {
-			Predicate predicate = Predicate.create("is_true_" + name);
+			FunctionSymbol functionSymbol = FunctionSymbol.create("is_true_" + name);
 			AtomicFormulaSkeleton skeleton = createContextAtomicFormulaSkeleton(vars,
-					predicate);
+					functionSymbol);
 			formulas.add(skeleton);
-			predicates.put(name, predicate);
+			functionSymbols.put(name, functionSymbol);
 		}
 		
 		return PredicatesDef.create(formulas);
 	}
 
 	private AtomicFormulaSkeleton createContextAtomicFormulaSkeleton(
-			List<Variable> vars, Predicate predicate) {
+			List<Variable> vars, FunctionSymbol functionSymbol) {
 		TypedList<Variable> typedList = TypedList.create(vars, CONTEXT_TYPE, null);
-		AtomicFormulaSkeleton skeleton = AtomicFormulaSkeleton.create(predicate, typedList);
+		AtomicFormulaSkeleton skeleton = AtomicFormulaSkeleton.create(functionSymbol, typedList);
 		return skeleton;
 	}
-	
-	private TimelessDef createTimelessDef() {
-		List<Literal<Name>> defs = new ArrayList<Literal<Name>>();
-		return TimelessDef.create(defs);
-	}
-	
-	private SafetyDef createSafetyDef() {
-		//TODO
-		return SafetyDef.create(null);
-	}
+
 	
 	/**
 	 * Creates:
@@ -345,8 +313,8 @@ public class AfsmParser {
 				}
 			}
 			
-			satisfyEff.add(Effect.createFormula(AtomicFormula.create(predicates.get(v.getName()), CONTEXT_TERM)));
-			unsatisfyEff.add(Effect.createNot(AtomicFormula.create(predicates.get(v.getName()), CONTEXT_TERM)));
+			satisfyEff.add(Effect.createFormula(AtomicFormula.create(functionSymbols.get(v.getName()), CONTEXT_TERM)));
+			unsatisfyEff.add(Effect.createNot(AtomicFormula.create(functionSymbols.get(v.getName()), CONTEXT_TERM)));
 			
 			Effect satisfyEffect = Effect.createAnd(satisfyEff.toArray(new Effect[satisfyEff.size()]));
 			Effect unsatisfyEffect = Effect.createAnd(unsatisfyEff.toArray(new Effect[unsatisfyEff.size()]));
@@ -379,22 +347,22 @@ public class AfsmParser {
 	
 	private void parseConstrainForEffect(Constrain.AThenB con,
 			List<Effect> satisfyEff, List<Effect> unsatisfyEff) {
-		satisfyEff.add(Effect.createFormula(AtomicFormula.create(predicates.get(con.requiree.getName()), CONTEXT_TERM)));
+		satisfyEff.add(Effect.createFormula(AtomicFormula.create(functionSymbols.get(con.requiree.getName()), CONTEXT_TERM)));
 	}
 	
 	private void parseConstrainForEffect(Constrain.AThenNotB con,
 			List<Effect> satisfyEff, List<Effect> unsatisfyEff) {
-		satisfyEff.add(Effect.createNot(AtomicFormula.create(predicates.get(con.requiree.getName()), CONTEXT_TERM)));
+		satisfyEff.add(Effect.createNot(AtomicFormula.create(functionSymbols.get(con.requiree.getName()), CONTEXT_TERM)));
 	}
 	
 	private void parseConstrainForEffect(Constrain.NotAThenB con,
 			List<Effect> satisfyEff, List<Effect> unsatisfyEff) {
-		unsatisfyEff.add(Effect.createFormula(AtomicFormula.create(predicates.get(con.requiree.getName()), CONTEXT_TERM)));
+		unsatisfyEff.add(Effect.createFormula(AtomicFormula.create(functionSymbols.get(con.requiree.getName()), CONTEXT_TERM)));
 	}
 	
 	private void parseConstrainForEffect(Constrain.NotAThenNotB con,
 			List<Effect> satisfyEff, List<Effect> unsatisfyEff) {
-		unsatisfyEff.add(Effect.createNot(AtomicFormula.create(predicates.get(con.requiree.getName()), CONTEXT_TERM)));
+		unsatisfyEff.add(Effect.createNot(AtomicFormula.create(functionSymbols.get(con.requiree.getName()), CONTEXT_TERM)));
 	}
 	
 	private void parseConstrainForPrecondition(Constrain con,
@@ -452,14 +420,14 @@ public class AfsmParser {
 	}
 
 	private Effect createEffectForAssignment(Assignment s) {
-		Predicate predicate = predicates.get(s.getVariable().getName());
-		AtomicFormula<Term> formula = AtomicFormula.create(predicate, CONTEXT_TERM);	
+		FunctionSymbol functionSymbol = functionSymbols.get(s.getVariable().getName());
+		AtomicFormula<Term> formula = AtomicFormula.create(functionSymbol, CONTEXT_TERM);	
 		return (s instanceof Assignment.Negate) ? Effect.createNot(formula) : Effect.createFormula(formula);
 	}
 	
 	private Effect createEffectForState(State s, boolean negate) {
-		Predicate predicate = predicates.get(s.getName());
-		AtomicFormula<Term> formula = AtomicFormula.create(predicate, STATE_TERM);	
+		FunctionSymbol functionSymbol = functionSymbols.get(s.getName());
+		AtomicFormula<Term> formula = AtomicFormula.create(functionSymbol, STATE_TERM);	
 		return negate ? Effect.createNot(formula) : Effect.createFormula(formula);
 	}
 	
@@ -482,7 +450,7 @@ public class AfsmParser {
 			throw new IllegalStateException("False not defined: " + predicate);
 		} if (predicate instanceof uk.ac.ucl.cs.afsm.common.predicate.Variable) {
 			uk.ac.ucl.cs.afsm.common.predicate.Variable v = (uk.ac.ucl.cs.afsm.common.predicate.Variable)predicate;
-			AtomicFormula<Term> formula = AtomicFormula.create(predicates.get(v.getName()), term);
+			AtomicFormula<Term> formula = AtomicFormula.create(functionSymbols.get(v.getName()), term);
 			return GD.createFormula(formula);
 		} else if (predicate instanceof Operator.Not) {
 			Operator.Not not = (Operator.Not) predicate;
@@ -518,7 +486,7 @@ public class AfsmParser {
 		List<GD> states = new ArrayList<GD>();
 		for (State s : afsm.states) {
 			if (s.outGoingRules.contains(r)) {
-				AtomicFormula<Term> formula = AtomicFormula.create(predicates.get(s.getName()), STATE_TERM);
+				AtomicFormula<Term> formula = AtomicFormula.create(functionSymbols.get(s.getName()), STATE_TERM);
 				
 				states.add(GD.createFormula(formula));
 			}
@@ -548,11 +516,11 @@ public class AfsmParser {
 	}
 	
 	public AtomicFormula<Name> createStateFormulaForProblem(State s) {
-		return AtomicFormula.create(predicates.get(s.getName()), STATE_VARIABLE_NAME);
+		return AtomicFormula.create(functionSymbols.get(s.getName()), STATE_VARIABLE_NAME);
 	}
 	
 	public GD createStateGDForProblem(State s) {
-		AtomicFormula<Term> formula = AtomicFormula.create(predicates.get(s.getName()), Term.create(STATE_VARIABLE_NAME));
+		AtomicFormula<Term> formula = AtomicFormula.create(functionSymbols.get(s.getName()), Term.create(STATE_VARIABLE_NAME));
 		return GD.createFormula(formula);
 	}
 	
@@ -564,7 +532,7 @@ public class AfsmParser {
 		List<Literal<Name>> list = new ArrayList<Literal<Name>>();
 		list.add(Literal.createFormula(AtomicFormula.create(existPredicate, CONTEXT_VARIABLE_NAME)));
 		for (String key : afsm.variables.keySet()) {
-			Predicate p = predicates.get(key);
+			FunctionSymbol p = functionSymbols.get(key);
 			AtomicFormula<Name> f = AtomicFormula.create(p, CONTEXT_VARIABLE_NAME);
 			list.add(Literal.createNot(f));
 		}

@@ -15,24 +15,19 @@ public class Domain extends Streamable {
 	// Required
 	protected Name name;
 	
-	protected ExtensionDef extensionDef;
-	
 	protected RequireDef requireDef;
 	
 	// Requires RequireKey.TYPING
 	protected TypesDef typesDef;
 	
 	protected ConstantsDef constantsDef;
-
-	// Requires RequireKey.EXPRESSION_EVALUATION
-	protected DomainVarsDef domainsVarDef;
 	
 	protected PredicatesDef predicatesDef;
 	
-	protected TimelessDef timelessDef;
+	// Requires RequireKey.FLUENTS
+	protected FunctionsDef functionsDef;
 	
-	// Requires RequireKey.SAFETY_CONSTRAINTS
-	protected SafetyDef safetyDef;
+	protected Constraints constraints;
 	
 	// 0..n
 	protected List<StructureDef> structureDefs = new ArrayList<StructureDef>();
@@ -49,9 +44,6 @@ public class Domain extends Streamable {
 		++ alignment;
 		align();
 		
-		writeIntoIfDefined(extensionDef, pw);
-		align();
-		
 		writeIntoIfDefined(requireDef, pw);
 		align();
 		
@@ -62,21 +54,9 @@ public class Domain extends Streamable {
 		
 		writeIntoIfDefined(constantsDef, pw);
 		
-		if (requireDef.requireKeys.contains(RequireKey.EXPRESSION_EVALUATION)) {
-			writeIntoIfDefined(domainsVarDef, pw);
-			align();
-		}
 		
 		writeIntoIfDefined(predicatesDef, pw);
 		align();
-		
-		writeIntoIfDefined(timelessDef, pw);
-		align();
-		
-		if (requireDef.requireKeys.contains(RequireKey.SAFETY_CONSTRAINTS)) {
-			writeIntoIfDefined(safetyDef, pw);
-			align();
-		}
 		
 		writeIntoIfDefined(structureDefs, pw);
 		align();
@@ -86,9 +66,9 @@ public class Domain extends Streamable {
 		pw.print(")");
 	}
 
-	public static Domain create(Name name, ExtensionDef extensionDef, RequireDef requireDef, TypesDef typesDef,
-			ConstantsDef constantsDef, DomainVarsDef domainsVarDef, PredicatesDef predicatesDef,
-			TimelessDef timelessDef, SafetyDef safetyDef, List<StructureDef> structureDefs) {
+	public static Domain create(Name name, RequireDef requireDef, TypesDef typesDef,
+			ConstantsDef constantsDef, PredicatesDef predicatesDef,
+			FunctionsDef functionsDef, Constraints constraints, List<StructureDef> structureDefs) {
 		if (name == null) {
 			throw new IllegalStateException("Statement <domain> must have a <name>.");
 		}
@@ -103,26 +83,20 @@ public class Domain extends Streamable {
 					"Statement <types-def> requires <require-key> :types.");
 		}
 		
-		if (domainsVarDef != null && !requireDef.requireKeys.contains(RequireKey.EXPRESSION_EVALUATION)) {
-			throw new IllegalStateException(
-					"Statement <domain-var-def> requires <require-key> :expression-evaluation.");
-		}
 		
-		if (safetyDef != null && !requireDef.requireKeys.contains(RequireKey.SAFETY_CONSTRAINTS)) {
+		if (functionsDef != null && !requireDef.requireKeys.contains(RequireKey.FLUENTS)) {
 			throw new IllegalStateException(
-					"Statement <safety-def> requires <require-key> :safety-constraints.");
+					"Statement <functions-def> requires <require-key> :fluents.");
 		}
 		
 		Domain domain = new Domain();
 		domain.name = name;
-		domain.extensionDef = extensionDef;
 		domain.requireDef = requireDef;
 		domain.typesDef = typesDef;
 		domain.constantsDef = constantsDef;
-		domain.domainsVarDef = domainsVarDef;
 		domain.predicatesDef = predicatesDef;
-		domain.timelessDef = timelessDef;
-		domain.safetyDef = safetyDef;
+		domain.functionsDef = functionsDef;
+		domain.constraints = constraints;
 		domain.structureDefs.addAll(structureDefs);
 		return domain;
 	}
