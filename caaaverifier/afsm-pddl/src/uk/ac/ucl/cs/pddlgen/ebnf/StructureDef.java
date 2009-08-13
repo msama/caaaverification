@@ -7,75 +7,52 @@ package uk.ac.ucl.cs.pddlgen.ebnf;
  * @author rax
  *
  */
-public class StructureDef extends Streamable {
-
-	ActionDef actionDef;
+public abstract class StructureDef extends Streamable {
 	
-	// Requires RequireKey.DOMAIN_AXIOMS
-	AxiomDef axiomDef;
-	
-	// Requires RequireKey.ACTION_EXPANSIONS
-	MethodDef methodDef;
-
-	private StructureDef() {
-		
-	}
-
-	@Override
-	protected void printInternal() {
-		if (actionDef != null) {
-			writeInto(pw, actionDef);
-		} else if (axiomDef != null) {
-			writeInto(pw, axiomDef);
-		} else if (methodDef != null) {
-			writeInto(pw, methodDef);
-		}
-		align();
-	} 
-
-	public static StructureDef create(Name name, TypedList<Variable> variables,
-			ActionDefBody actionDefBody) {
-		return create(ActionDef.create(new ActionFunctor(name), variables, actionDefBody));
-	}
-	
-	public static StructureDef create(ActionDef actionDef) {
+	public static StructureDef create(final ActionDef actionDef) {
 		if (actionDef == null) {
 			throw new IllegalStateException(
-					"Statement <axiom-def> must contain only one statement between an " +
-					"<action-def> or an <axiom-def> or a <method-def>.");
+					"Statement <DurativeActionDef> cannot be null.");
 		}
-		StructureDef structure = new StructureDef();
-		structure.actionDef = actionDef;
-		return structure;
+		return new StructureDef() {
+			@Override
+			protected void printInternal() {
+				writeInto(pw, actionDef);
+			}
+		};
 	}
 	
-	public static StructureDef create(AxiomDef axiomDef) {
-		if (axiomDef == null) {
-			throw new IllegalStateException(
-					"Statement <axiom-def> must contain only one statement between an " +
-					"<action-def> or an <axiom-def> or a <method-def>.");
+	public static StructureDef create(final DurativeActionDef actionDef) {
+		if (definedKeys.contains(RequireKey.DURATIVE_ACTIONS)) {
+			throw new IllegalStateException(":durative-actions not defined.");
 		}
-		if (!definedKeys.contains(RequireKey.DOMAIN_AXIOMS)) {
+		
+		if (actionDef == null) {
 			throw new IllegalStateException(
-					"Statement <axiom-def> requires <require-key> :domain-axioms.");
+					"Statement <DurativeActionDef> cannot be null.");
 		}
-		StructureDef structure = new StructureDef();
-		structure.axiomDef = axiomDef;
-		return structure;
+		return new StructureDef() {
+			@Override
+			protected void printInternal() {
+				writeInto(pw, actionDef);
+			}
+		};
 	}
 	
-	public static StructureDef create(MethodDef methodDef) {
-		if (methodDef == null) {
-			throw new IllegalStateException(
-					"Statement <axiom-def> must contain only one statement between an " +
-					"<action-def> or an <axiom-def> or a <method-def>.");
+	public static StructureDef create(final DerivedDef derivedDef) {
+		if (definedKeys.contains(RequireKey.DERIVED_PREDICATES)) {
+			throw new IllegalStateException(":durative-actions not defined.");
 		}
-		if (!definedKeys.contains(RequireKey.ACTION_EXPANSIONS)) {
+		
+		if (derivedDef == null) {
 			throw new IllegalStateException(
-					"Statement <method-def> requires <require-key> :action-expansions.");
+					"Statement <DurativeActionDef> cannot be null.");
 		}
-		StructureDef structure = new StructureDef();
-		structure.methodDef = methodDef;
-		return structure;
+		return new StructureDef() {
+			@Override
+			protected void printInternal() {
+				writeInto(pw, derivedDef);
+			}
+		};
 	}
 }

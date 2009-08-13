@@ -25,7 +25,7 @@ public abstract class Type extends Streamable {
 		return t;
 	}
 
-	public static Type create(final List<Type> either) {
+	public static Type create(final List<PrimitiveType> either) {
 		if (either == null) {
 			throw new IllegalArgumentException("Statement <type> must have some eithers.");
 		}
@@ -33,25 +33,6 @@ public abstract class Type extends Streamable {
 			protected void printInternal() {
 				pw.print("(either ");
 				super.writeSpaceSeparatedList(either);
-				pw.print(")");
-			}
-		};
-		return t;
-	}
-	
-	public static Type create(final Type fluent) {
-		if (fluent == null) {
-			throw new IllegalArgumentException("Statement <type> must have a <type> fluent.");
-		}
-		if (!definedKeys.contains(RequireKey.FLUENTS)) {
-			throw new IllegalArgumentException(
-					"A fluent <type> can only be specified if <require-key> :fluents is specified.");
-		}
-		
-		Type t = new Type() {
-			protected void printInternal() {
-				pw.print("(fluent ");
-				writeInto(pw, fluent);
 				pw.print(")");
 			}
 		};

@@ -36,6 +36,8 @@ public class RequireKey extends Streamable {
 	public static final RequireKey TRUE_NEGATION = new RequireKey("true-negation");
 	public static final RequireKey ADL = new RequireKey("adl");
 	public static final RequireKey UCPOP = new RequireKey("ucpop");
+	public static final Object DERIVED_PREDICATES = new RequireKey("derived-predicates");
+	public static final Object DURATIVE_ACTIONS = new RequireKey("durative-actions");
 
 
 		
