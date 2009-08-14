@@ -30,7 +30,5 @@ public class Effect extends Streamable {
 			pw.print(")");
 		}
 	}
-	
-	
 
 }

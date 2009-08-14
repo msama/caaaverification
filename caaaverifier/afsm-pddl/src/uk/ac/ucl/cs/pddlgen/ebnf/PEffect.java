@@ -35,7 +35,7 @@ public abstract class PEffect extends Streamable {
 	
 	public static PEffect fluent(final AssignOp assignOp, final FHead fHead, final FExp fExp) {
 		if (!definedKeys.contains(RequireKey.FLUENTS)) {
-			throw new IllegalStateException("");
+			throw new IllegalStateException("RequireKey.FLUENTS must be defined.");
 		}
 		return new PEffect(){
 			@Override
