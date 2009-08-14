@@ -3,10 +3,6 @@
  */
 package uk.ac.ucl.cs.pddlgen.ebnf;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * @author rax
  *
@@ -60,13 +56,7 @@ public abstract class Effect extends Streamable {
 		Effect effect = new Effect(){ 
 			protected void printInternal() {
 				pw.print("(not ");
-				//++alignment;
-				//align();
-				//pw.print("(");
 				writeInto(pw, formula);
-				//pw.print(")");
-				//--alignment;
-				//align();
 				pw.print(")");
 			}
 		};
@@ -81,9 +71,7 @@ public abstract class Effect extends Streamable {
 		
 		Effect effect = new Effect(){ 
 			protected void printInternal() {
-				//pw.print("(");
 				writeInto(pw, formula);
-				//pw.print(")");
 			}
 		};
 		return effect;

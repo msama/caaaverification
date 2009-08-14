@@ -9,19 +9,19 @@ package uk.ac.ucl.cs.pddlgen.ebnf;
  */
 public class ActionDef extends Streamable {
 
-	protected ActionFunctor actionFunctor;
+	protected ActionSymbol actionSymbol;
 	protected TypedList<Variable> variables;
 	protected ActionDefBody actionDefBody;
 	
 	
 	/**
-	 * @param actionFunctor
+	 * @param actionSymbol
 	 * @param variables
 	 * @param actionDefBody
 	 */
-	private ActionDef(ActionFunctor actionFunctor,
+	private ActionDef(ActionSymbol actionSymbol,
 			TypedList<Variable> variables, ActionDefBody actionDefBody) {
-		this.actionFunctor = actionFunctor;
+		this.actionSymbol = actionSymbol;
 		this.variables = variables;
 		this.actionDefBody = actionDefBody;
 	}
@@ -32,7 +32,7 @@ public class ActionDef extends Streamable {
 	@Override
 	protected void printInternal() {
 		pw.print("(:action ");
-		writeInto(pw, actionFunctor);
+		writeInto(pw, actionSymbol);
 		++ alignment;
 		align();
 		
@@ -47,9 +47,9 @@ public class ActionDef extends Streamable {
 		pw.print(")");
 	}
 
-	public static ActionDef create(ActionFunctor actionFunctor, TypedList<Variable> variables,
+	public static ActionDef create(ActionSymbol actionSymbol, TypedList<Variable> variables,
 			ActionDefBody actionDefBody) {
-		if (actionFunctor == null) {
+		if (actionSymbol == null) {
 			throw new IllegalStateException("Statement <action> requires an <action-functor>.");
 		}
 
@@ -60,6 +60,6 @@ public class ActionDef extends Streamable {
 		if (actionDefBody == null) {
 			throw new IllegalStateException("Statement <action> requires an <action-def body>.");
 		}
-		return new ActionDef(actionFunctor, variables, actionDefBody);
+		return new ActionDef(actionSymbol, variables, actionDefBody);
 	}
 }
