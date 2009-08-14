@@ -4,7 +4,6 @@
 package uk.ac.ucl.cs.pddlgen.ebnf;
 
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.util.*;
 
 /**
@@ -65,38 +64,6 @@ public abstract class Streamable {
 		st.printToStream(pw);
 		//align();
 	}
-
-	/*
-	protected void writeInto(PrintStream pw, List<? extends Streamable> elements) {
-		if (elements == null) {
-			throw new IllegalArgumentException(
-					"This element is required and cannot be null!");
-		}
-		if (elements.size() == 0) {
-			throw new IllegalArgumentException(
-				"At least one element of this type must be defined!");
-		}
-		for (Streamable st : elements) {
-			writeInto(pw, st);
-		}
-	}*/
-	
-	/*
-	protected void writeInto(PrintStream pw, Streamable... elements) {
-		if (elements == null) {
-			throw new IllegalArgumentException(
-					"This element is required and cannot be null!");
-		}
-		if (elements.length == 0) {
-			throw new IllegalArgumentException(
-				"At least one element of this type must be defined!");
-		}
-		for (Streamable st : elements) {
-			st.printToStream(pw);
-			pw.print(' ');
-			//align();
-		}
-	}*/
 	
 	protected <T extends Streamable> void writeSpaceSeparatedList(final List<T> list) {
 		int i = 0;
@@ -118,7 +85,7 @@ public abstract class Streamable {
 		}
 	}
 	
-	protected <K extends Streamable> void writeAlignedList(List<K> list) {
+	protected <K extends Streamable> void writeAlignedList(Iterable<K> list) {
 		++alignment;
 		for (K s : list) {
 			align();
@@ -127,4 +94,5 @@ public abstract class Streamable {
 		--alignment;
 		align();
 	}
+
 }
