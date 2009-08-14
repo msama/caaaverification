@@ -9,14 +9,14 @@ package uk.ac.ucl.cs.pddlgen.ebnf;
  */
 public class ActionTerm extends Streamable {
 
-	private ActionFunctor functor;
+	private ActionSymbol functor;
 	private Term[] terms;
 	
 	/**
 	 * @param functor
 	 * @param terms
 	 */
-	private ActionTerm(ActionFunctor functor, Term[] terms) {
+	private ActionTerm(ActionSymbol functor, Term[] terms) {
 		this.functor = functor;
 		this.terms = terms;
 	}	
@@ -31,7 +31,7 @@ public class ActionTerm extends Streamable {
 	}
 
 	public static ActionTerm create(
-			final ActionFunctor functor, final Term[] terms) {
+			final ActionSymbol functor, final Term[] terms) {
 		if (functor == null) {
 			throw new IllegalArgumentException("Statement <action-term> " +
 					"must contain a <action functor>.");

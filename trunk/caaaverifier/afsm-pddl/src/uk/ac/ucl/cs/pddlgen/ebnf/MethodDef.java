@@ -9,7 +9,7 @@ package uk.ac.ucl.cs.pddlgen.ebnf;
  */
 public class MethodDef extends Streamable {
 
-	private ActionFunctor functor;
+	private ActionSymbol functor;
 	private Name name;
 	private TypedList<Variable> parameters;
 	private ActionDefBody body;
@@ -38,7 +38,7 @@ public class MethodDef extends Streamable {
 		pw.print(")");
 	}
 	
-	public static MethodDef create(ActionFunctor functor, TypedList<Variable> parameters, ActionDefBody body) {
+	public static MethodDef create(ActionSymbol functor, TypedList<Variable> parameters, ActionDefBody body) {
 		if (functor == null) {
 			throw new IllegalArgumentException("ActionFunctor cannot be null");
 		}
@@ -55,7 +55,7 @@ public class MethodDef extends Streamable {
 		return method;
 	}
 	
-	public static MethodDef create(ActionFunctor functor, Name name, TypedList<Variable> parameters, ActionDefBody body) {
+	public static MethodDef create(ActionSymbol functor, Name name, TypedList<Variable> parameters, ActionDefBody body) {
 		if (name == null) {
 			throw new IllegalArgumentException("Name cannot be null");
 		}

@@ -46,6 +46,8 @@ public class GD extends Streamable {
 	// Requires RequireKey.UNIVERSAL_PRECONDITIONS
 	protected GD forallEffect;
 	
+	protected FComp fComp;
+	
 	private GD() {
 		
 	}
@@ -105,6 +107,8 @@ public class GD extends Streamable {
 				writeGD(forallEffect);
 				pw.print(")");
 				break;
+			case FLUENT:
+				writeInto(pw, fComp);
 		}
 	}
 	
@@ -126,7 +130,8 @@ public class GD extends Streamable {
 		NOT,
 		IMPLY,
 		EXISTS,
-		FORALL;
+		FORALL,
+		FLUENT;
 	}
 	
 	public static GD createFormula(AtomicFormula<Term> formula) {
@@ -264,6 +269,17 @@ public class GD extends Streamable {
 		gd.forallEffect = effect;
 		
 		gd.expansion = Expansion.FORALL;
+		return gd;
+	}
+	
+	public static GD createFluent(final FComp fComp) {
+		if (!Streamable.definedKeys.contains(RequireKey.FLUENTS)) {
+			throw new IllegalStateException("Statement forall can only be used if " +
+					"<fluents> defines :universal-preconditions.");
+		}
+		GD gd = new GD();
+		gd.expansion = Expansion.FLUENT;
+		gd.fComp = fComp;
 		return gd;
 	}
 }
