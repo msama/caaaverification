@@ -9,9 +9,9 @@ package uk.ac.ucl.cs.pddlgen.ebnf;
  */
 public class AtomicFormulaSkeleton extends Streamable {
 
-	FunctionSymbol functionSymbol;
+	private Predicate predicate;
 	
-	TypedList<Variable> typedList;
+	private TypedList<Variable> typedList;
 	
 	private AtomicFormulaSkeleton() {
 		
@@ -23,14 +23,15 @@ public class AtomicFormulaSkeleton extends Streamable {
 	@Override
 	protected void printInternal() {
 		pw.print("(");
-		writeInto(pw, functionSymbol);
+		writeInto(pw, predicate);
 		pw.print(" ");
 		writeInto(pw, typedList);
 		pw.print(")");
 	}
 
-	public static AtomicFormulaSkeleton create(FunctionSymbol functionSymbol,	TypedList<Variable> typedList) {
-		if (functionSymbol == null) {
+	public static AtomicFormulaSkeleton create(Predicate predicate,
+			TypedList<Variable> typedList) {
+		if (predicate == null) {
 			throw new IllegalStateException(
 					"Statement <atomic-formula-skeleton> must have a <predicate>.");
 		}
@@ -39,7 +40,7 @@ public class AtomicFormulaSkeleton extends Streamable {
 					"Statement <atomic-formula-skeleton> must have a <typed list (variable)>.");
 		}
 		AtomicFormulaSkeleton skeleton = new AtomicFormulaSkeleton();
-		skeleton.functionSymbol = functionSymbol;
+		skeleton.predicate = predicate;
 		skeleton.typedList = typedList;
 		return skeleton;
 	}

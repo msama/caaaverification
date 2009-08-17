@@ -36,4 +36,7 @@ public class EmptyOr<T extends Streamable> extends Streamable {
 		}
 	}
 
+	public static <K extends Streamable> EmptyOr<K> create(K k){
+		return new EmptyOr<K>(k);
+	}
 }
