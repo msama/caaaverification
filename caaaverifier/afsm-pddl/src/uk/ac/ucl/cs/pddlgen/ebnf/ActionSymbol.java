@@ -26,5 +26,11 @@ public class ActionSymbol extends Streamable {
 		writeInto(pw, name);
 	}
 
+	public static ActionSymbol create(String name) {
+		return create(Name.create(name));
+	}
 	
+	public static ActionSymbol create(Name name) {
+		return new ActionSymbol(name);
+	}
 }

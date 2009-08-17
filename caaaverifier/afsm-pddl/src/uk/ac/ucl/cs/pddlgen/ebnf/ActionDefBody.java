@@ -31,6 +31,10 @@ public class ActionDefBody extends Streamable {
 		align();
 	}
 	
+	public static ActionDefBody create(PreGD precondition, Effect effect) {
+		return create(EmptyOr.create(precondition), EmptyOr.create(effect));
+	}
+	
 	public static ActionDefBody create(EmptyOr<PreGD> precondition, EmptyOr<Effect> effect) {
 		if (precondition == null) {
 			throw new IllegalArgumentException("Precondition cannot be null.");

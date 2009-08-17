@@ -31,4 +31,11 @@ public class Effect extends Streamable {
 		}
 	}
 
+	public static Effect create(CEffect cEffect) {
+		return new Effect(new CEffect[]{ cEffect });
+	}
+	
+	public static Effect and(CEffect... cEffects) {
+		return new Effect(cEffects);
+	}
 }
