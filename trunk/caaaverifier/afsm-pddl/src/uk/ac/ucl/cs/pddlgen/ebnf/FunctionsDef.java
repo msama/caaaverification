@@ -14,7 +14,7 @@ public class FunctionsDef extends Streamable {
 	/**
 	 * 
 	 */
-	public FunctionsDef(TypedList<AtomicFunctionSkeleton> typedList) {
+	private FunctionsDef(TypedList<AtomicFunctionSkeleton> typedList) {
 		this.typedList = typedList;
 	}
 
@@ -29,6 +29,9 @@ public class FunctionsDef extends Streamable {
 	}
 
 	public static FunctionsDef create(TypedList<AtomicFunctionSkeleton> typedList) {
+		if (!definedKeys.contains(RequireKey.FLUENTS)) {
+			throw new IllegalStateException(":fluents must be defined.");
+		}
 		if (typedList == null) {
 			throw new IllegalArgumentException("TypedList should not be null.");
 		}

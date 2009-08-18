@@ -3,6 +3,9 @@
  */
 package uk.ac.ucl.cs.pddlgen.ebnf;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author rax
  *
@@ -34,6 +37,17 @@ public class AtomicFunctionSkeleton extends Streamable {
 		pw.print(")");
 	}
 
+	public static AtomicFunctionSkeleton create(FunctionSymbol symbol,
+			Variable... variables) {
+		List<Variable> varList = new ArrayList<Variable>();
+		for (Variable v : variables) {
+			varList.add(v);
+		}
+		TypedList<Variable> typedList = TypedList.create(varList);
+		return create(symbol, typedList);	
+	}
+	
+	
 	public static AtomicFunctionSkeleton create(FunctionSymbol symbol,
 			TypedList<Variable> typedList) {
 		if (symbol == null || symbol.name.equals("")) {
