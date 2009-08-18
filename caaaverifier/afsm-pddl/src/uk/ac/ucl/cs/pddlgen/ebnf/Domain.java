@@ -53,9 +53,17 @@ public class Domain extends Streamable {
 		}
 		
 		writeIntoIfDefined(constantsDef, pw);
-		
+		align();
 		
 		writeIntoIfDefined(predicatesDef, pw);
+		align();
+		
+		if (requireDef.requireKeys.contains(RequireKey.FLUENTS)) {
+			writeIntoIfDefined(functionsDef, pw);
+			align();
+		}
+		
+		writeIntoIfDefined(constraints, pw);
 		align();
 		
 		writeIntoIfDefined(structureDefs, pw);

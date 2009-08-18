@@ -22,10 +22,13 @@ import uk.ac.ucl.cs.pddlgen.ebnf.ActionDefBody;
 import uk.ac.ucl.cs.pddlgen.ebnf.ActionSymbol;
 import uk.ac.ucl.cs.pddlgen.ebnf.AtomicFormula;
 import uk.ac.ucl.cs.pddlgen.ebnf.AtomicFormulaSkeleton;
+import uk.ac.ucl.cs.pddlgen.ebnf.AtomicFunctionSkeleton;
 import uk.ac.ucl.cs.pddlgen.ebnf.CEffect;
 import uk.ac.ucl.cs.pddlgen.ebnf.ConstantsDef;
 import uk.ac.ucl.cs.pddlgen.ebnf.Domain;
 import uk.ac.ucl.cs.pddlgen.ebnf.Effect;
+import uk.ac.ucl.cs.pddlgen.ebnf.FunctionSymbol;
+import uk.ac.ucl.cs.pddlgen.ebnf.FunctionsDef;
 import uk.ac.ucl.cs.pddlgen.ebnf.GD;
 import uk.ac.ucl.cs.pddlgen.ebnf.Literal;
 import uk.ac.ucl.cs.pddlgen.ebnf.Name;
@@ -51,6 +54,10 @@ public class AfsmParser {
 	public static final String STATE = "state";
 	public static final String CONTEXT = "context";
 	public static final String PRIORITY = "priority";
+	
+	public static final FunctionSymbol STATE_FUNCTION_SYMBOL = FunctionSymbol.create("AssignState");
+	public static final FunctionSymbol PRIORITY_FUNCTION_SYMBOL = FunctionSymbol.create("AssignPriority");
+	
 	
 	public static final Name STATE_NAME = Name.create(STATE);
 	public static final Name CONTEXT_NAME = Name.create(CONTEXT);
@@ -135,13 +142,23 @@ public class AfsmParser {
 				createTypesDef(), 
 				null, //createConstantsDef(), 
 				createPredicatesDef(), 
-				null, // createFunctionsDef()
+				createFunctionsDef(),
 				null, // createContraints()
 				createStructureDefs()
 				);
 		return domain;
 	}
 	
+	private FunctionsDef createFunctionsDef() {
+		List<AtomicFunctionSkeleton> list = new ArrayList<AtomicFunctionSkeleton>();
+		
+		list.add(AtomicFunctionSkeleton.create(STATE_FUNCTION_SYMBOL, STATE_VARIABLE));
+		list.add(AtomicFunctionSkeleton.create(PRIORITY_FUNCTION_SYMBOL, PRIORITY_VARIABLE));
+		
+		TypedList<AtomicFunctionSkeleton> functionsList = TypedList.create(list);
+		return FunctionsDef.create(functionsList);
+	}
+
 	/**
 	 * Creates a list of the common requirements
 	 * 
@@ -153,6 +170,7 @@ public class AfsmParser {
 		keys.add(RequireKey.TYPING);
 		keys.add(RequireKey.EQUALITY);
 		keys.add(RequireKey.DISJUNCTIVE_PRECONDITIONS);
+		keys.add(RequireKey.FLUENTS);
 		Streamable.definedKeys.addAll(keys);
 		return RequireDef.create(keys);
 	}
