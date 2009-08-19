@@ -2,7 +2,7 @@ package uk.ac.ucl.cs.pddlgen.ebnf;
 
 public abstract class Goal extends Streamable {
 
-	public static Goal create(final GD gd) {
+	public static Goal create(final PreGD preGD) {
 		return new Goal() {
 
 			@Override
@@ -10,7 +10,7 @@ public abstract class Goal extends Streamable {
 				pw.print("(:goal ");
 				++alignment;
 				align();
-				writeInto(pw, gd);
+				writeInto(pw, preGD);
 				--alignment;
 				align();
 				pw.print(")");
@@ -18,21 +18,5 @@ public abstract class Goal extends Streamable {
 			
 		};
 	}
-	
-	// TODO(rax): this should only accept ActionDef<ActionTerm>
-	public static Goal create(final ActionSpec action) {
-		if (!definedKeys.contains(RequireKey.ACTION_EXPANSIONS)) {
-			throw new IllegalArgumentException("RequireKey.ACTION_EXPANSIONS is required.");
-		}
-		return new Goal() {
 
-			@Override
-			protected void printInternal() {
-				pw.print("(:expansion ");
-				writeInto(pw, action);
-				pw.print(")");
-			}
-			
-		};		
-	}
 }

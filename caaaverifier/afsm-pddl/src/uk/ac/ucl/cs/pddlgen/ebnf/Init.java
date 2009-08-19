@@ -5,34 +5,34 @@ import java.util.List;
 
 public class Init extends Streamable {
 
-	private List<Literal<Name>> literals = new ArrayList<Literal<Name>>();
+	private List<InitEl> elements = new ArrayList<InitEl>();
 	
 	/**
 	 * @param names
 	 */
-	private Init(List<Literal<Name>> names) {
-		this.literals = names;
+	private Init(List<InitEl> elements) {
+		this.elements = elements;
 	}
 	
-	public static Init create(List<Literal<Name>> names) {
-		if (names == null || names.size() == 0) {
+	public static Init create(List<InitEl> elements) {
+		if (elements == null || elements.size() == 0) {
 			throw new IllegalArgumentException("Init should contain at least 1 literal.");
 		}
-		return new Init(names);
+		return new Init(elements);
 	}
 	
 	@Override
 	protected void printInternal() {
-		boolean align = literals.size() > 1;
+		boolean align = elements.size() > 1;
 		
 		pw.print("(:init ");
 		int i = 0;
 		if (align) {
 			++alignment;
 		}
-		for (Literal<Name> literal : literals) {
-			writeInto(pw, literal);
-			if (++i < literals.size()) {
+		for (InitEl el : elements) {
+			writeInto(pw, el);
+			if (++i < elements.size()) {
 				if (align) {
 					align();
 				} else {
