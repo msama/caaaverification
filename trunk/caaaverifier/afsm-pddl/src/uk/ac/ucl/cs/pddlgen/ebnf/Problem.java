@@ -13,6 +13,7 @@ public class Problem extends Streamable {
 	private ObjectDeclaration objectDeclaration;
 	private Init init;
 	private List<Goal> goals = new ArrayList<Goal>();
+	private Constraints constraints;
 	private LengthSpec lengthSpec;
 	
 	
@@ -27,9 +28,16 @@ public class Problem extends Streamable {
 	 * @param goals
 	 * @param lengthSpec
 	 */
-	public Problem(Name domainName, Name problemName, RequireDef requireDef,
-			Situation situation, ObjectDeclaration objectDeclaration,
-			Init init, List<Goal> goals, LengthSpec lengthSpec) {
+	public Problem(Name domainName,
+			Name problemName, 
+			RequireDef requireDef,
+			Situation situation, 
+			ObjectDeclaration objectDeclaration,
+			Init init, 
+			List<Goal> goals,
+			Constraints constraints,
+			//MetricSpec metricSpec,
+			LengthSpec lengthSpec) {
 		this.domainName = domainName;
 		this.problemName = problemName;
 		this.requireDef = requireDef;
@@ -37,6 +45,7 @@ public class Problem extends Streamable {
 		this.objectDeclaration = objectDeclaration;
 		this.init = init;
 		this.goals = goals;
+		this.constraints = constraints;
 		this.lengthSpec = lengthSpec;
 	}
 
@@ -69,6 +78,10 @@ public class Problem extends Streamable {
 			writeInto(pw, g);
 			align();
 		}
+		
+		writeIntoIfDefined(constraints, pw);
+		align();
+		
 		if (lengthSpec != null) {
 			writeInto(pw, lengthSpec);
 			align();
