@@ -286,7 +286,8 @@ public class AfsmParser {
 			PEffect resetPriority = PEffect.fluent(
 					AssignOp.assign(), 
 					FHead.create(PRIORITY_FUNCTION_SYMBOL),
-					FExp.create(Number.create(rule.getPriority())));
+					// Reset the priority
+					FExp.create(Number.create(Rule.MAX_PRIORITY)));
 			and[i++] = CEffect.create(resetPriority);
 			
 			Effect effect = Effect.and(and);
@@ -640,6 +641,11 @@ public class AfsmParser {
 	public InitEl createStateInitEl(State s) {
 		//return AtomicFormula.create(predicates.get(s.getName()), STATE_VARIABLE_NAME);
 		return InitEl.create(FHead.create(STATE_FUNCTION_SYMBOL), stateNumber.get(s));
+	}
+	
+	public InitEl createPriotityInitEl(int p) {
+		//return AtomicFormula.create(predicates.get(s.getName()), STATE_VARIABLE_NAME);
+		return InitEl.create(FHead.create(PRIORITY_FUNCTION_SYMBOL), Number.create(p));
 	}
 	
 	public GD createStateGDForProblem(State s) {
