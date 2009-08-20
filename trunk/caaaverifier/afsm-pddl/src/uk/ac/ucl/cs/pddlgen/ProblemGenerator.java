@@ -34,7 +34,7 @@ public abstract class ProblemGenerator {
 	
 	protected ObjectDeclaration createObject() {
 		TypedList<Name> typedList = null;
-		typedList = TypedList.create(AfsmParser.STATE_VARIABLE_NAME, AfsmParser.STATE_TYPE, typedList);
+		//typedList = TypedList.create(AfsmParser.STATE_VARIABLE_NAME, AfsmParser.STATE_TYPE, typedList);
 		typedList = TypedList.create(AfsmParser.CONTEXT_VARIABLE_NAME, AfsmParser.CONTEXT_TYPE, typedList);
 		return ObjectDeclaration.create(typedList);
 	}
