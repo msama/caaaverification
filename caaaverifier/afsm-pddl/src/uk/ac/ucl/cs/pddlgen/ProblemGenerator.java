@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import uk.ac.ucl.cs.afsm.common.AdaptationFiniteStateMachine;
+import uk.ac.ucl.cs.afsm.common.Rule;
 import uk.ac.ucl.cs.pddlgen.ebnf.Init;
 import uk.ac.ucl.cs.pddlgen.ebnf.InitEl;
 import uk.ac.ucl.cs.pddlgen.ebnf.Literal;
@@ -66,6 +67,7 @@ public abstract class ProblemGenerator {
 		List<InitEl> elements = new ArrayList<InitEl>();
 		// Initial state
 		elements.add(parser.createStateInitEl(afsm.getInitialState()));
+		elements.add(parser.createPriotityInitEl(Rule.MAX_PRIORITY));
 		// Context
 		//list.addAll(parser.createInitiContextLiteralsForProblem());
 		return Init.create(elements);
