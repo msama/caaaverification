@@ -8,6 +8,7 @@ import java.util.List;
 
 import uk.ac.ucl.cs.afsm.common.AdaptationFiniteStateMachine;
 import uk.ac.ucl.cs.pddlgen.ebnf.Init;
+import uk.ac.ucl.cs.pddlgen.ebnf.InitEl;
 import uk.ac.ucl.cs.pddlgen.ebnf.Literal;
 import uk.ac.ucl.cs.pddlgen.ebnf.Name;
 import uk.ac.ucl.cs.pddlgen.ebnf.ObjectDeclaration;
@@ -62,11 +63,11 @@ public abstract class ProblemGenerator {
 	}
 	
 	protected Init createInit() {
-		List<Literal<Name>> list = new ArrayList<Literal<Name>>();
+		List<InitEl> elements = new ArrayList<InitEl>();
 		// Initial state
-		list.add(Literal.createFormula(parser.createStateFormulaForProblem(afsm.getInitialState())));
+		elements.add(parser.createStateInitEl(afsm.getInitialState()));
 		// Context
 		//list.addAll(parser.createInitiContextLiteralsForProblem());
-		return Init.create(list);
+		return Init.create(elements);
 	}
 }

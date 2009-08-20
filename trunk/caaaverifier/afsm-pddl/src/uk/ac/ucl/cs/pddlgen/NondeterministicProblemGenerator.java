@@ -12,6 +12,8 @@ import uk.ac.ucl.cs.afsm.common.State;
 import uk.ac.ucl.cs.pddlgen.ebnf.GD;
 import uk.ac.ucl.cs.pddlgen.ebnf.Goal;
 import uk.ac.ucl.cs.pddlgen.ebnf.Name;
+import uk.ac.ucl.cs.pddlgen.ebnf.PreGD;
+import uk.ac.ucl.cs.pddlgen.ebnf.PrefGD;
 import uk.ac.ucl.cs.pddlgen.ebnf.Problem;
 
 /**
@@ -43,9 +45,13 @@ public class NondeterministicProblemGenerator extends ProblemGenerator {
 				}
 				
 				Goal goal = Goal.create(
-						GD.createAnd(getCommonStatesGD(rule1,rule2),
-								parser.createRuleGDForProblem(rule1), 
-								parser.createRuleGDForProblem(rule2)));
+						PreGD.create(
+								PrefGD.create(
+										GD.createAnd(getCommonStatesGD(rule1,rule2),
+												parser.createRuleGDForProblem(rule1), 
+												parser.createRuleGDForProblem(rule2)))
+								)
+						);
 				List<Goal> goals = new ArrayList<Goal>();
 				goals.add(goal);
 				
@@ -57,6 +63,7 @@ public class NondeterministicProblemGenerator extends ProblemGenerator {
 						createObject(),
 						createInit(),
 						goals,
+						null, // Constraints
 						null// length
 						);
 				problems.add(problem);

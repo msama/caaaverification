@@ -42,7 +42,9 @@ public abstract class PEffect extends Streamable {
 			protected void printInternal() {
 				pw.print("(");
 				writeInto(pw, assignOp);
+				pw.print(" ");
 				writeInto(pw, fHead);
+				pw.print(" ");
 				writeInto(pw, fExp);
 				pw.print(")");
 			}

@@ -12,6 +12,8 @@ import uk.ac.ucl.cs.afsm.common.State;
 import uk.ac.ucl.cs.pddlgen.ebnf.GD;
 import uk.ac.ucl.cs.pddlgen.ebnf.Goal;
 import uk.ac.ucl.cs.pddlgen.ebnf.Name;
+import uk.ac.ucl.cs.pddlgen.ebnf.PreGD;
+import uk.ac.ucl.cs.pddlgen.ebnf.PrefGD;
 import uk.ac.ucl.cs.pddlgen.ebnf.Problem;
 
 /**
@@ -46,7 +48,12 @@ public class RuleLivenessProblemDefinition extends ProblemGenerator {
 			GD ruleDG = parser.createRuleGDForProblem(rule);
 			List<GD> states = getStatesGD(rule);
 			for (GD state : states) {
-				Goal goal = Goal.create(GD.createAnd(state,ruleDG));
+				Goal goal = Goal.create(
+						PreGD.create(
+								PrefGD.create(
+										GD.createAnd(state,ruleDG))
+								)
+						);
 				goals.add(goal);
 			}
 			
@@ -58,6 +65,7 @@ public class RuleLivenessProblemDefinition extends ProblemGenerator {
 					createObject(),
 					createInit(),
 					goals,
+					null, // Constraints
 					null// length
 					);
 			problems.add(problem);
