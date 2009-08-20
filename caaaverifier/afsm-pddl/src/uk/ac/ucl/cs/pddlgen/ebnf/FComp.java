@@ -38,7 +38,7 @@ public class FComp extends Streamable {
 		pw.print(")");
 	}
 
-	private static FComp create(BinaryComp binaryComp, FExp expLeft, FExp expRight) {
+	public static FComp create(BinaryComp binaryComp, FExp expLeft, FExp expRight) {
 		return new FComp(binaryComp, expLeft, expRight);
 	}
 }

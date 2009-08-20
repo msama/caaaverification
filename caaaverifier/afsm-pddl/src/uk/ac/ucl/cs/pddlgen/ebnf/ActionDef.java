@@ -39,12 +39,14 @@ public class ActionDef extends Streamable {
 		pw.print(":parameters (");
 		writeInto(pw, variables);
 		pw.print(")");
+		align();
 		
 		writeInto(pw, actionDefBody);
 		
 		-- alignment;
 		align();
 		pw.print(")");
+		align();
 	}
 
 	public static ActionDef create(ActionSymbol actionSymbol, TypedList<Variable> variables,

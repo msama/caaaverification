@@ -10,6 +10,8 @@ import uk.ac.ucl.cs.afsm.common.AdaptationFiniteStateMachine;
 import uk.ac.ucl.cs.afsm.common.State;
 import uk.ac.ucl.cs.pddlgen.ebnf.Goal;
 import uk.ac.ucl.cs.pddlgen.ebnf.Name;
+import uk.ac.ucl.cs.pddlgen.ebnf.PreGD;
+import uk.ac.ucl.cs.pddlgen.ebnf.PrefGD;
 import uk.ac.ucl.cs.pddlgen.ebnf.Problem;
 
 /**
@@ -38,7 +40,11 @@ public class ReachabilityProblemDefinition extends ProblemGenerator {
 		for (State state : afsm.states) {
 			
 			Goal goal = Goal.create(
-					parser.createStateGDForProblem(state));
+					PreGD.create(
+							PrefGD.create(
+									parser.createStateGDForProblem(state))
+							)
+					);
 			List<Goal> goals = new ArrayList<Goal>();
 			goals.add(goal);
 			
@@ -50,6 +56,7 @@ public class ReachabilityProblemDefinition extends ProblemGenerator {
 					createObject(),
 					createInit(),
 					goals,
+					null, // constraints
 					null// length
 					);
 			problems.add(problem);

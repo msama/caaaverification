@@ -16,9 +16,6 @@ public abstract class TypedList<T extends Streamable> extends Streamable {
 		if (names == null) {
 			throw new IllegalArgumentException("Names cannot be null!");
 		}
-		if (names.size() < 1) {
-			throw new IllegalArgumentException("Names must contain at least a name!");
-		}
 		TypedList<K> typedList = new TypedList<K>() {
 			@Override
 			protected void printInternal() {

@@ -20,18 +20,26 @@ import uk.ac.ucl.cs.afsm.common.predicate.Operator;
 import uk.ac.ucl.cs.pddlgen.ebnf.ActionDef;
 import uk.ac.ucl.cs.pddlgen.ebnf.ActionDefBody;
 import uk.ac.ucl.cs.pddlgen.ebnf.ActionSymbol;
+import uk.ac.ucl.cs.pddlgen.ebnf.AssignOp;
 import uk.ac.ucl.cs.pddlgen.ebnf.AtomicFormula;
 import uk.ac.ucl.cs.pddlgen.ebnf.AtomicFormulaSkeleton;
 import uk.ac.ucl.cs.pddlgen.ebnf.AtomicFunctionSkeleton;
+import uk.ac.ucl.cs.pddlgen.ebnf.BinaryComp;
 import uk.ac.ucl.cs.pddlgen.ebnf.CEffect;
 import uk.ac.ucl.cs.pddlgen.ebnf.ConstantsDef;
 import uk.ac.ucl.cs.pddlgen.ebnf.Domain;
 import uk.ac.ucl.cs.pddlgen.ebnf.Effect;
+import uk.ac.ucl.cs.pddlgen.ebnf.EmptyOr;
+import uk.ac.ucl.cs.pddlgen.ebnf.FComp;
+import uk.ac.ucl.cs.pddlgen.ebnf.FExp;
+import uk.ac.ucl.cs.pddlgen.ebnf.FHead;
 import uk.ac.ucl.cs.pddlgen.ebnf.FunctionSymbol;
 import uk.ac.ucl.cs.pddlgen.ebnf.FunctionsDef;
 import uk.ac.ucl.cs.pddlgen.ebnf.GD;
+import uk.ac.ucl.cs.pddlgen.ebnf.InitEl;
 import uk.ac.ucl.cs.pddlgen.ebnf.Literal;
 import uk.ac.ucl.cs.pddlgen.ebnf.Name;
+import uk.ac.ucl.cs.pddlgen.ebnf.Number;
 import uk.ac.ucl.cs.pddlgen.ebnf.PEffect;
 import uk.ac.ucl.cs.pddlgen.ebnf.PreGD;
 import uk.ac.ucl.cs.pddlgen.ebnf.Predicate;
@@ -55,13 +63,12 @@ public class AfsmParser {
 	public static final String CONTEXT = "context";
 	public static final String PRIORITY = "priority";
 	
-	public static final FunctionSymbol STATE_FUNCTION_SYMBOL = FunctionSymbol.create("AssignState");
-	public static final FunctionSymbol PRIORITY_FUNCTION_SYMBOL = FunctionSymbol.create("AssignPriority");
-	
-	
 	public static final Name STATE_NAME = Name.create(STATE);
 	public static final Name CONTEXT_NAME = Name.create(CONTEXT);
 	public static final Name PRIORITY_NAME = Name.create(PRIORITY);
+	
+	public static final FunctionSymbol STATE_FUNCTION_SYMBOL = FunctionSymbol.create(STATE_NAME);
+	public static final FunctionSymbol PRIORITY_FUNCTION_SYMBOL = FunctionSymbol.create(PRIORITY_NAME);
 	
 	public static final Name STATE_VARIABLE_NAME = Name.create("s");
 	public static final Name CONTEXT_VARIABLE_NAME = Name.create("c");
@@ -84,6 +91,7 @@ public class AfsmParser {
 	private RequireDef requireDef;
 	
 	private Map<String, Predicate> predicates = new HashMap<String, Predicate>();
+	private Map<State, Number> stateNumber = new HashMap<State, Number>();
 	
 	private Map<Rule, GD> ruleTriggersGD = new HashMap<Rule, GD>();
 	
@@ -94,6 +102,12 @@ public class AfsmParser {
 	 */
 	public AfsmParser(AdaptationFiniteStateMachine afsm) {
 		this.afsm = afsm;
+	
+		int id = 0;
+		for (State s : this.afsm.states) {
+			stateNumber.put(s, Number.create(id++));
+		}
+		
 		domainName = Name.create(afsm.getName());
 		requireDef = createRequireDef();
 		domain = parse();
@@ -186,7 +200,6 @@ public class AfsmParser {
 	private TypesDef createTypesDef() {
 		List<Name> names = new ArrayList<Name>();
 		names.add(CONTEXT_NAME);
-		names.add(STATE_NAME);
 		TypedList<Name> types = TypedList.create(names);
 		return TypesDef.create(types);
 	}
@@ -209,32 +222,9 @@ public class AfsmParser {
 	private PredicatesDef createPredicatesDef() {
 		List<AtomicFormulaSkeleton> formulas = new ArrayList<AtomicFormulaSkeleton>();
 		
-		//Type t = null;
-		//Variable var = null;
 		List<Variable> vars = new ArrayList<Variable>();
-
-		//t= Type.create(this.names.get("state"));
-		//var = Variable.create("s");
-		vars.add(STATE_VARIABLE);
-		
-		for (State state : afsm.states) {
-			String key = state.getName();
-			Predicate predicate = Predicate.create("is_state_" + key);
-
-			TypedList<Variable> typedList = TypedList.create(vars, STATE_TYPE, null);
-			AtomicFormulaSkeleton skeleton = AtomicFormulaSkeleton.create(predicate, typedList);
-			formulas.add(skeleton);
-			predicates.put(key, predicate);
-		}
-		
-
-		vars = new ArrayList<Variable>();
 		vars.add(CONTEXT_VARIABLE);
-		
-		//existPredicate = Predicate.create("exist");
-		//formulas.add(createContextAtomicFormulaSkeleton(vars, existPredicate));
-		//predicates.put("exist", existPredicate);
-		
+
 		for (String name : afsm.variables.keySet()) {
 			Predicate predicate = Predicate.create("is_true_" + name);
 			AtomicFormulaSkeleton skeleton = createContextAtomicFormulaSkeleton(vars,
@@ -273,13 +263,17 @@ public class AfsmParser {
 			GD trigger = parsePredicate(rule.getTrigger());
 			ruleTriggersGD.put(rule, trigger);
 			GD initialStates = parseInitialStates(rule);
+			
+			GD priority = createPriorityGD(rule.getPriority());
+			
 			PreGD preconditions = PreGD.create(
 					PrefGD.create(
-							GD.createAnd(initialStates, trigger)
+							GD.createAnd(initialStates, priority, trigger)
 							)
 					); 
 			
-			CEffect[] and = new CEffect[rule.action.size() + afsm.states.size()];
+			// One effect per rule plus one per the destination state and one for priority
+			CEffect[] and = new CEffect[rule.action.size() + 2];
 			
 			int i = 0;
 			for (Assignment a : rule.action) {
@@ -287,9 +281,14 @@ public class AfsmParser {
 			}
 			
 			//Add the future state
-			for (State s : afsm.states) {
-				and[i++] = createEffectForState(s, !(s.equals(rule.getDestination())));
-			}
+			and[i++] = createEffectForState(rule.getDestination());
+			
+			PEffect resetPriority = PEffect.fluent(
+					AssignOp.assign(), 
+					FHead.create(PRIORITY_FUNCTION_SYMBOL),
+					FExp.create(Number.create(rule.getPriority())));
+			and[i++] = CEffect.create(resetPriority);
+			
 			Effect effect = Effect.and(and);
 			
 			
@@ -319,18 +318,19 @@ public class AfsmParser {
 				}
 			}
 			
+			GD priority = createPriorityGD(Rule.LOW_PRIORITY + 1);
 			GD satisfyPreconditions = null;
 			GD unsatisfyPreconditions = null;
 			if (satisfyPrec.size() > 0) {
 				satisfyPreconditions = GD.createOr(satisfyPrec.toArray(new GD[satisfyPrec.size()]));
-				satisfyPreconditions = GD.createAnd(satisfyPreconditions, GD.createNot(parsePredicate(v)));
+				satisfyPreconditions = GD.createAnd(priority, satisfyPreconditions, GD.createNot(parsePredicate(v)));
 			} else {
 				satisfyPreconditions = GD.createNot(parsePredicate(v));
 			}
 			
 			if (unsatisfyPrec.size() > 0) {
 				unsatisfyPreconditions = GD.createOr(unsatisfyPrec.toArray(new GD[unsatisfyPrec.size()]));
-				unsatisfyPreconditions = GD.createAnd(unsatisfyPreconditions, parsePredicate(v));
+				unsatisfyPreconditions = GD.createAnd(priority, unsatisfyPreconditions, parsePredicate(v));
 			} else {
 				unsatisfyPreconditions =  parsePredicate(v);
 			}
@@ -363,6 +363,8 @@ public class AfsmParser {
 							)
 					);
 			
+			
+			
 			Effect satisfyEffect = Effect.and(
 					satisfyEff.toArray(new CEffect[satisfyEff.size()]));
 			Effect unsatisfyEffect = Effect.and(
@@ -384,7 +386,52 @@ public class AfsmParser {
 			defs.add(StructureDef.create(actionDefUnsatisfy));
 		}
 		
+		defs.add(createIncreasePriority());
+		
 		return defs;
+	}
+
+	private StructureDef createIncreasePriority() {
+		ActionSymbol actionSymbol = ActionSymbol.create("increasePriority");
+		TypedList<Variable> variables = TypedList.create(new ArrayList<Variable>());
+		
+		Effect increasePriority = Effect.create(
+				CEffect.create(
+						PEffect.fluent(
+								AssignOp.increase(), 
+								FHead.create(PRIORITY_FUNCTION_SYMBOL),
+								FExp.create(Number.create(1))
+						)
+				)
+		);
+		
+		PreGD preconditions = PreGD.create(
+				PrefGD.create(
+					GD.createFluent(
+							FComp.create(
+									BinaryComp.lesser(), 
+									FExp.create(FHead.create(PRIORITY_FUNCTION_SYMBOL)),
+									FExp.create(Number.create(Rule.LOW_PRIORITY + 1))
+							)
+					)
+				)
+		);
+		
+		ActionDefBody actionDefBody = ActionDefBody.create(
+				preconditions,
+				increasePriority
+				);
+		
+		ActionDef actionDef = ActionDef.create(actionSymbol, variables, actionDefBody);
+		return StructureDef.create(actionDef);
+	}
+
+	private GD createPriorityGD(int priority) {
+		return GD.createFluent(
+				FComp.create(
+						BinaryComp.equals(), 
+						FExp.create(FHead.create(PRIORITY_FUNCTION_SYMBOL)),
+						FExp.create(Number.create(priority))));
 	}
 
 	private void parseConstrainForEffect(Constrain con,
@@ -472,10 +519,10 @@ public class AfsmParser {
 		typedList = createTypedList(CONTEXT_VARIABLE, CONTEXT_TYPE, typedList);
 		
 		// Add state as a variable
-		typedList = createTypedList(STATE_VARIABLE, STATE_TYPE, typedList);
+		//typedList = createTypedList(STATE_VARIABLE, STATE_TYPE, typedList);
 		
 		// Add priority
-		typedList = createTypedList(PRIORITY_VARIABLE, PRIORITY_TYPE, typedList);
+		//typedList = createTypedList(PRIORITY_VARIABLE, PRIORITY_TYPE, typedList);
 		
 		return typedList;
 	}
@@ -494,11 +541,13 @@ public class AfsmParser {
 		return cEffect;
 	}
 	
-	private CEffect createEffectForState(State s, boolean negate) {
-		Predicate predicate = predicates.get(s.getName());
-		AtomicFormula<Term> formula = AtomicFormula.create(predicate, STATE_TERM);	
+	private CEffect createEffectForState(State s) {
+		//Predicate predicate = predicates.get(s.getName());
+		//AtomicFormula<Term> formula = AtomicFormula.create(predicate, STATE_TERM);	
 		
-		PEffect pEffect = (negate) ? PEffect.not(formula) : PEffect.create(formula);
+		PEffect pEffect = PEffect.fluent(AssignOp.assign(),
+				FHead.create(STATE_FUNCTION_SYMBOL), 
+				FExp.create(stateNumber.get(s)));
 		CEffect cEffect = CEffect.create(pEffect);
 		return cEffect;
 	}
@@ -558,10 +607,10 @@ public class AfsmParser {
 		List<GD> states = new ArrayList<GD>();
 		for (State s : afsm.states) {
 			if (s.outGoingRules.contains(r)) {
-				AtomicFormula<Term> formula = AtomicFormula.create(
-						predicates.get(s.getName()), STATE_TERM);
-				
-				states.add(GD.createFormula(formula));
+				FComp fComp = FComp.create(BinaryComp.equals(),
+						FExp.create(FHead.create(STATE_FUNCTION_SYMBOL)),
+						FExp.create(stateNumber.get(s)));
+				states.add(GD.createFluent(fComp));
 			}
 		}
 		// TODO(rax): if size is 0 the rule is dead...
@@ -588,14 +637,16 @@ public class AfsmParser {
 		return parsePredicate(rule.getTrigger(), Term.create(CONTEXT_VARIABLE_NAME), true);
 	}
 	
-	public AtomicFormula<Name> createStateFormulaForProblem(State s) {
-		return AtomicFormula.create(predicates.get(s.getName()), STATE_VARIABLE_NAME);
+	public InitEl createStateInitEl(State s) {
+		//return AtomicFormula.create(predicates.get(s.getName()), STATE_VARIABLE_NAME);
+		return InitEl.create(FHead.create(STATE_FUNCTION_SYMBOL), stateNumber.get(s));
 	}
 	
 	public GD createStateGDForProblem(State s) {
-		AtomicFormula<Term> formula = AtomicFormula.create(
-				predicates.get(s.getName()), Term.create(STATE_VARIABLE_NAME));
-		return GD.createFormula(formula);
+		FComp fComp = FComp.create(BinaryComp.equals(),
+				FExp.create(FHead.create(STATE_FUNCTION_SYMBOL)),
+				FExp.create(stateNumber.get(s)));
+		return GD.createFluent(fComp);
 	}
 	
 	public GD createInStateAssumptionGDForProblem(State s) {

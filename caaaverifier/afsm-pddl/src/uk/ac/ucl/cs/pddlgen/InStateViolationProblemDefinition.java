@@ -11,6 +11,8 @@ import uk.ac.ucl.cs.afsm.common.State;
 import uk.ac.ucl.cs.pddlgen.ebnf.GD;
 import uk.ac.ucl.cs.pddlgen.ebnf.Goal;
 import uk.ac.ucl.cs.pddlgen.ebnf.Name;
+import uk.ac.ucl.cs.pddlgen.ebnf.PreGD;
+import uk.ac.ucl.cs.pddlgen.ebnf.PrefGD;
 import uk.ac.ucl.cs.pddlgen.ebnf.Problem;
 
 /**
@@ -45,9 +47,16 @@ public class InStateViolationProblemDefinition extends ProblemGenerator {
 			} catch (IllegalStateException ex) {
 				continue;
 			}
-			Goal goal = Goal.create(GD.createAnd(
-					parser.createStateGDForProblem(state),
-					GD.createNot(assumption)));
+			Goal goal = Goal.create(
+					PreGD.create(
+							PrefGD.create(
+									GD.createAnd(
+											parser.createStateGDForProblem(state),
+											GD.createNot(assumption)
+									)
+							)
+					)
+			);
 			List<Goal> goals = new ArrayList<Goal>();
 			goals.add(goal);
 			
@@ -59,6 +68,7 @@ public class InStateViolationProblemDefinition extends ProblemGenerator {
 					createObject(),
 					createInit(),
 					goals,
+					null, // Constraints
 					null// length
 					);
 			problems.add(problem);
