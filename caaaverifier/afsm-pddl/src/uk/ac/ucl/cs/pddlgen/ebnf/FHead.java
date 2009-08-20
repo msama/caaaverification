@@ -37,15 +37,13 @@ public class FHead extends Streamable {
 	 */
 	@Override
 	protected void printInternal() {
+		pw.print("(");
+		writeInto(pw, functionSymbol);
 		if (terms.size() > 0) {
-			pw.print("(");
-			writeInto(pw, functionSymbol);
 			pw.print(" ");
 			writeSpaceSeparatedList(terms);
-			pw.print(")");
-		} else {
-			writeInto(pw, functionSymbol);
 		}
+		pw.print(")");
 	}
 
 	public static FHead create(FunctionSymbol functionSymbol, Term... terms) {

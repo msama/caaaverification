@@ -166,8 +166,8 @@ public class AfsmParser {
 	private FunctionsDef createFunctionsDef() {
 		List<AtomicFunctionSkeleton> list = new ArrayList<AtomicFunctionSkeleton>();
 		
-		list.add(AtomicFunctionSkeleton.create(STATE_FUNCTION_SYMBOL, STATE_VARIABLE));
-		list.add(AtomicFunctionSkeleton.create(PRIORITY_FUNCTION_SYMBOL, PRIORITY_VARIABLE));
+		list.add(AtomicFunctionSkeleton.create(STATE_FUNCTION_SYMBOL));
+		list.add(AtomicFunctionSkeleton.create(PRIORITY_FUNCTION_SYMBOL));
 		
 		TypedList<AtomicFunctionSkeleton> functionsList = TypedList.create(list);
 		return FunctionsDef.create(functionsList);
