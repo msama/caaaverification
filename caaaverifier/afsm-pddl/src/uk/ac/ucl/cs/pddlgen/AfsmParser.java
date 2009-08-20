@@ -283,11 +283,7 @@ public class AfsmParser {
 			//Add the future state
 			and[i++] = createEffectForState(rule.getDestination());
 			
-			PEffect resetPriority = PEffect.fluent(
-					AssignOp.assign(), 
-					FHead.create(PRIORITY_FUNCTION_SYMBOL),
-					// Reset the priority
-					FExp.create(Number.create(Rule.MAX_PRIORITY)));
+			PEffect resetPriority = createPEffectResetPriority();
 			and[i++] = CEffect.create(resetPriority);
 			
 			Effect effect = Effect.and(and);
@@ -326,14 +322,14 @@ public class AfsmParser {
 				satisfyPreconditions = GD.createOr(satisfyPrec.toArray(new GD[satisfyPrec.size()]));
 				satisfyPreconditions = GD.createAnd(priority, satisfyPreconditions, GD.createNot(parsePredicate(v)));
 			} else {
-				satisfyPreconditions = GD.createNot(parsePredicate(v));
+				satisfyPreconditions = GD.createAnd(priority, GD.createNot(parsePredicate(v)));
 			}
 			
 			if (unsatisfyPrec.size() > 0) {
 				unsatisfyPreconditions = GD.createOr(unsatisfyPrec.toArray(new GD[unsatisfyPrec.size()]));
 				unsatisfyPreconditions = GD.createAnd(priority, unsatisfyPreconditions, parsePredicate(v));
 			} else {
-				unsatisfyPreconditions =  parsePredicate(v);
+				unsatisfyPreconditions =  GD.createAnd(priority, parsePredicate(v));
 			}
 			
 			// Add AND with the variable negated
@@ -364,6 +360,9 @@ public class AfsmParser {
 							)
 					);
 			
+			// Reset Priority
+			satisfyEff.add(CEffect.create(createPEffectResetPriority()));
+			unsatisfyEff.add(CEffect.create(createPEffectResetPriority()));
 			
 			
 			Effect satisfyEffect = Effect.and(
@@ -387,44 +386,87 @@ public class AfsmParser {
 			defs.add(StructureDef.create(actionDefUnsatisfy));
 		}
 		
-		defs.add(createIncreasePriority());
+		defs.addAll(createIncreasePriority());
 		
 		return defs;
 	}
 
-	private StructureDef createIncreasePriority() {
-		ActionSymbol actionSymbol = ActionSymbol.create("increasePriority");
-		TypedList<Variable> variables = TypedList.create(new ArrayList<Variable>());
+	private PEffect createPEffectResetPriority() {
+		PEffect resetPriority = PEffect.fluent(
+				AssignOp.assign(), 
+				FHead.create(PRIORITY_FUNCTION_SYMBOL),
+				// Reset the priority
+				FExp.create(Number.create(Rule.MAX_PRIORITY)));
+		return resetPriority;
+	}
+
+	private List<StructureDef> createIncreasePriority() {
+		List<StructureDef> defs = new ArrayList<StructureDef>();
 		
-		Effect increasePriority = Effect.create(
-				CEffect.create(
-						PEffect.fluent(
-								AssignOp.increase(), 
-								FHead.create(PRIORITY_FUNCTION_SYMBOL),
-								FExp.create(Number.create(1))
-						)
-				)
-		);
-		
-		PreGD preconditions = PreGD.create(
-				PrefGD.create(
-					GD.createFluent(
-							FComp.create(
-									BinaryComp.lesser(), 
-									FExp.create(FHead.create(PRIORITY_FUNCTION_SYMBOL)),
-									FExp.create(Number.create(Rule.LOW_PRIORITY + 1))
+		// COntext changes act into a level of priority lower than rules (Rule.LOW_PRIORITY + 1)
+		for (int i = Rule.MAX_PRIORITY; i <= Rule.LOW_PRIORITY; i++) {
+			ActionSymbol actionSymbol = ActionSymbol.create("set_priority_" + (i + 1));
+			TypedList<Variable> variables = null;
+			// Add context
+			variables = createTypedList(CONTEXT_VARIABLE, CONTEXT_TYPE, variables);
+			
+			Effect increasePriority = Effect.create(
+					CEffect.create(
+							PEffect.fluent(
+									AssignOp.assign(), 
+									FHead.create(PRIORITY_FUNCTION_SYMBOL),
+									FExp.create(Number.create(i + 1))
 							)
 					)
-				)
+			);
+			
+			PreGD preconditions = createPreconditionForPriorityAt(i);
+			
+			ActionDefBody actionDefBody = ActionDefBody.create(
+					preconditions,
+					increasePriority
+					);
+			
+			ActionDef actionDef = ActionDef.create(actionSymbol, variables, actionDefBody);
+			defs.add(StructureDef.create(actionDef));
+		}
+		
+		return defs;
+	}
+	
+	private PreGD createPreconditionForPriorityAt(int currentPriority) {
+
+		List<GD> priorities = new ArrayList<GD>();
+		
+		for (State s : afsm.states){
+			List<uk.ac.ucl.cs.afsm.common.predicate.Predicate> predicates = 
+				new ArrayList<uk.ac.ucl.cs.afsm.common.predicate.Predicate>();
+			for (Rule r : s.outGoingRules) {
+				if (r.getPriority() == currentPriority) {
+					predicates.add(r.getTrigger());
+				}
+			}
+			GD stateGD = null;
+			if (predicates.size() > 0) {
+				Operator pInState = Operator.not(Operator.or(predicates));
+				stateGD = GD.createAnd(
+						createStateGDForProblem(s),
+						parsePredicate(pInState)
+				);
+			} else {
+				stateGD = createStateGDForProblem(s);
+			}
+			priorities.add(stateGD);
+		}
+		
+		GD globalActivation = GD.createAnd(
+				createPriorityGD(currentPriority),
+				GD.createOr(priorities.toArray(new GD[priorities.size()]))
 		);
 		
-		ActionDefBody actionDefBody = ActionDefBody.create(
-				preconditions,
-				increasePriority
-				);
-		
-		ActionDef actionDef = ActionDef.create(actionSymbol, variables, actionDefBody);
-		return StructureDef.create(actionDef);
+		return PreGD.create(
+				PrefGD.create(globalActivation)
+		);
 	}
 
 	private GD createPriorityGD(int priority) {
