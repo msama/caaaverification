@@ -7,7 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import uk.ac.ucl.cs.afsm.common.AdaptationFiniteStateMachine;
+import uk.ac.ucl.cs.afsm.common.Rule;
 import uk.ac.ucl.cs.afsm.common.State;
+import uk.ac.ucl.cs.afsm.common.predicate.Operator;
+import uk.ac.ucl.cs.afsm.common.predicate.Predicate;
 import uk.ac.ucl.cs.pddlgen.ebnf.GD;
 import uk.ac.ucl.cs.pddlgen.ebnf.Goal;
 import uk.ac.ucl.cs.pddlgen.ebnf.Name;
@@ -47,12 +50,21 @@ public class InStateViolationProblemDefinition extends ProblemGenerator {
 			} catch (IllegalStateException ex) {
 				continue;
 			}
+			/*
+			List<Predicate> predicates = new ArrayList<Predicate>();
+			for (Rule r : state.outGoingRules) {
+				predicates.add(r.getTrigger());
+			}
+			Predicate and = Operator.and(predicates);
+			GD outgoing = parser.parsePredicate(and);
+			*/
 			Goal goal = Goal.create(
 					PreGD.create(
 							PrefGD.create(
 									GD.createAnd(
 											parser.createStateGDForProblem(state),
-											GD.createNot(assumption)
+											GD.createNot(assumption)//,
+											//GD.createNot(outgoing)
 									)
 							)
 					)
