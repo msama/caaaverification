@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import falsePositive.GPSAFSM;
+
 import phoneAdapter.PhoneAdapterAfsm;
 
 import uk.ac.ucl.cs.afsm.common.AdaptationFiniteStateMachine;
@@ -114,7 +116,7 @@ public class AfsmParser {
 	}
 	
 	public static void main(String[] args) {
-		AdaptationFiniteStateMachine afsm = new PhoneAdapterAfsm().getAdaptationFiniteStateMachine();
+		AdaptationFiniteStateMachine afsm = new GPSAFSM().getAdaptationFiniteStateMachine();
 		AfsmParser parser = new AfsmParser(afsm);
 		parser.save("out");
 		
@@ -552,7 +554,7 @@ public class AfsmParser {
 	
 	private void parseConstrainForPrecondition(Constrain.NotAThenNotB con,
 			List<GD> satisfyPrec, List<GD> unsatisfyPrec) {
-		unsatisfyPrec.add(GD.createNot(parsePredicate(con.required)));
+		satisfyPrec.add(parsePredicate(con.required));
 	}
 	
 	public static TypedList<Variable> createPriorityStateContextTypedList() {
@@ -698,7 +700,7 @@ public class AfsmParser {
 	}
 	
 	public GD createInStateAssumptionGDForProblem(State s) {
-		return parsePredicate(s.getInStateAssumption(), Term.create(STATE_VARIABLE_NAME), true);
+		return parsePredicate(s.getInStateAssumption(), Term.create(CONTEXT_VARIABLE_NAME), true);
 	}
 	
 	public List<Literal<Name>> createInitiContextLiteralsForProblem() {

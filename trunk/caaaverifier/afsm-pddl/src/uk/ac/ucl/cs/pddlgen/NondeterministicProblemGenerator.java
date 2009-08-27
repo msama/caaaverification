@@ -40,7 +40,8 @@ public class NondeterministicProblemGenerator extends ProblemGenerator {
 			for (int j = i + 1; j < afsm.rules.size(); j++) {
 				Rule rule2 = afsm.rules.get(j);
 				
-				if (!haveCommonStates(rule1,rule2)) {
+				if ((rule1.getPriority() != rule2.getPriority()) ||
+						!haveCommonStates(rule1,rule2)) {
 					continue;
 				}
 				
