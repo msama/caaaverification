@@ -45,13 +45,13 @@ public class RuleLivenessProblemDefinition extends ProblemGenerator {
 			}
 			
 			List<Goal> goals = new ArrayList<Goal>();
-			GD ruleDG = parser.createRuleGDForProblem(rule);
+			GD ruleGD = parser.createPriorityGDForProblem(rule);
 			List<GD> states = getStatesGD(rule);
 			for (GD state : states) {
 				Goal goal = Goal.create(
 						PreGD.create(
 								PrefGD.create(
-										GD.createAnd(state,ruleDG))
+										GD.createAnd(state, ruleGD))
 								)
 						);
 				goals.add(goal);
