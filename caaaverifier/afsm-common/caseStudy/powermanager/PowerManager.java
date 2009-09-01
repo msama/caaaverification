@@ -68,10 +68,30 @@ public class PowerManager implements AfsmBuilder {
 		afsm.constrain(Constrain.createNotAThenNotB(keypadOpen, keypadEnlighted));
 		
 		Variable batteryLow = afsm.variable("BatteryLow", battery);
-		Variable batteryHigh = afsm.variable("BatteryMedium", battery);
+		Variable batteryMedium = afsm.variable("BatteryMedium", battery);
 		Variable batteryFull = afsm.variable("BatteryFull", battery);
 		Variable onACCharge = afsm.variable("OnACCharge", battery);
 		Variable onUSBCharge = afsm.variable("OnUSBCharge", battery);
+		afsm.constrain(Constrain.createAThenNotB(batteryLow, batteryMedium));
+		afsm.constrain(Constrain.createAThenNotB(batteryLow, batteryFull));
+		afsm.constrain(Constrain.createAThenNotB(batteryLow, onACCharge));
+		afsm.constrain(Constrain.createAThenNotB(batteryLow, onUSBCharge));
+		afsm.constrain(Constrain.createAThenNotB(batteryMedium, batteryLow));
+		afsm.constrain(Constrain.createAThenNotB(batteryMedium, batteryFull));
+		afsm.constrain(Constrain.createAThenNotB(batteryMedium, onACCharge));
+		afsm.constrain(Constrain.createAThenNotB(batteryMedium, onUSBCharge));
+		afsm.constrain(Constrain.createAThenNotB(batteryFull, batteryLow));
+		afsm.constrain(Constrain.createAThenNotB(batteryFull, batteryMedium));
+		afsm.constrain(Constrain.createAThenNotB(batteryFull, onACCharge));
+		afsm.constrain(Constrain.createAThenNotB(batteryFull, onUSBCharge));
+		afsm.constrain(Constrain.createAThenNotB(onACCharge, batteryLow));
+		afsm.constrain(Constrain.createAThenNotB(onACCharge, batteryMedium));
+		afsm.constrain(Constrain.createAThenNotB(onACCharge, batteryFull));
+		afsm.constrain(Constrain.createAThenNotB(onACCharge, onUSBCharge));
+		afsm.constrain(Constrain.createAThenNotB(onUSBCharge, batteryLow));
+		afsm.constrain(Constrain.createAThenNotB(onUSBCharge, batteryMedium));
+		afsm.constrain(Constrain.createAThenNotB(onUSBCharge, batteryFull));
+		afsm.constrain(Constrain.createAThenNotB(onUSBCharge, onACCharge));
 		
 		
 		// States
