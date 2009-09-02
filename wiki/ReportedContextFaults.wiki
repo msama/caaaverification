@@ -8,10 +8,13 @@ This is a list of reported context awareness faults which we have found on the w
 = Details =
 
 Easy wifi
+
 from http://forum.devicescape.com/index.php?topic=1035.0
 
     * Someone having start issues
 
+
+PowerManager
 
 From: http://www.xphonesoftware.com/pm.html#Change_history
 
@@ -20,6 +23,8 @@ From: http://www.xphonesoftware.com/pm.html#Change_history
     * Fixed race condition where the remote service could be stopped by mistake even if the monitor is enabled
     * Fixed problem with incorrect profile being applied during application launch because the service was not completely initialized
 
+
+Locale
 
 From: http://www.twofortyfouram.com/notes.html
 
@@ -31,6 +36,7 @@ From: http://www.twofortyfouram.com/notes.html
     * Fixed a bug with Time Conditions spanning across the PM-AM boundary
 
 
+Locify
 
 From http://www.locify.com/more/changelog & http://code.google.com/p/locify/issues/
 
