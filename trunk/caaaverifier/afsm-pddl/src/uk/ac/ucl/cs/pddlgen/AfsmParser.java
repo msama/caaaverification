@@ -11,6 +11,7 @@ import java.util.Map;
 import falsePositive.GPSAFSM;
 
 import phoneAdapter.PhoneAdapterAfsm;
+import powermanager.PowerManager;
 
 import uk.ac.ucl.cs.afsm.common.AdaptationFiniteStateMachine;
 import uk.ac.ucl.cs.afsm.common.Assignment;
@@ -64,17 +65,13 @@ public class AfsmParser {
 	public static final String STATE = "state";
 	public static final String CONTEXT = "context";
 	public static final String PRIORITY = "priority";
-	public static final String ADAPTATION = "adaptation";
 	
 	public static final Name STATE_NAME = Name.create(STATE);
 	public static final Name CONTEXT_NAME = Name.create(CONTEXT);
 	public static final Name PRIORITY_NAME = Name.create(PRIORITY);
-	public static final Name ADAPTATION_NAME = Name.create(ADAPTATION);
 	
 	public static final FunctionSymbol STATE_FUNCTION_SYMBOL = FunctionSymbol.create(STATE_NAME);
 	public static final FunctionSymbol PRIORITY_FUNCTION_SYMBOL = FunctionSymbol.create(PRIORITY_NAME);
-	public static final FunctionSymbol ADAPTATION_FUNCTION_SYMBOL = FunctionSymbol.create(ADAPTATION_NAME);
-	
 	
 	public static final Name STATE_VARIABLE_NAME = Name.create("s");
 	public static final Name CONTEXT_VARIABLE_NAME = Name.create("c");
@@ -120,7 +117,7 @@ public class AfsmParser {
 	}
 	
 	public static void main(String[] args) {
-		AdaptationFiniteStateMachine afsm = new GPSAFSM().getAdaptationFiniteStateMachine();
+		AdaptationFiniteStateMachine afsm = new PhoneAdapterAfsm().getAdaptationFiniteStateMachine();
 		AfsmParser parser = new AfsmParser(afsm);
 		parser.save("out");
 		
@@ -174,7 +171,6 @@ public class AfsmParser {
 		
 		list.add(AtomicFunctionSkeleton.create(STATE_FUNCTION_SYMBOL));
 		list.add(AtomicFunctionSkeleton.create(PRIORITY_FUNCTION_SYMBOL));
-		list.add(AtomicFunctionSkeleton.create(ADAPTATION_FUNCTION_SYMBOL));
 		
 		TypedList<AtomicFunctionSkeleton> functionsList = TypedList.create(list);
 		return FunctionsDef.create(functionsList);
@@ -263,59 +259,24 @@ public class AfsmParser {
 		
 		List<StructureDef> defs = new ArrayList<StructureDef>();
 		
-		// Adds two actions for each Rule
+		// Add an action for each Rule
 		for (Rule rule : afsm.rules) {
 			TypedList<Variable> variables = createPriorityStateContextTypedList();
 			
 			GD trigger = parsePredicate(rule.getTrigger());
 			ruleTriggersGD.put(rule, trigger);
 			GD initialStates = parseInitialStates(rule);
+			
 			GD priority = createPriorityGD(rule.getPriority());
-			GD notApplyingRule = createApplyingAdaptationGD(-1);
 			
 			PreGD preconditions = PreGD.create(
 					PrefGD.create(
-							GD.createAnd(initialStates, priority, trigger, notApplyingRule)
+							GD.createAnd(initialStates, priority, trigger)
 							)
 					); 
 			
-			// One effect per rule plus one for setAdaptation and priority
+			// One effect per rule plus one per the destination state and one for priority
 			CEffect[] and = new CEffect[rule.action.size() + 2];
-			
-			int i = 0;
-			for (Assignment a : rule.action) {
-				and[i++] = createEffectForAssignment(a);
-			}
-			
-			//Add the future state
-			PEffect setAdaptation = createPEffectSetAdaptation(rule);
-			and[i++] = CEffect.create(setAdaptation);
-			
-			and[i++] = createEffectSetPriority(rule.getPriority() + 1);
-			
-			Effect effect = Effect.and(and);
-			
-			
-			ActionSymbol actionSymbol = ActionSymbol.create("applying_rule_" + rule.getName());
-			ActionDefBody actionDefBody = ActionDefBody.create(preconditions, effect);			
-			
-			ActionDef actionDef = ActionDef.create(actionSymbol, variables, actionDefBody);
-			StructureDef struct = StructureDef.create(actionDef);
-			
-			defs.add(struct);
-		}
-		
-		for (Rule rule : afsm.rules) {
-			TypedList<Variable> variables = createPriorityStateContextTypedList();
-			
-			GD applyingRule = createApplyingAdaptationGD(rule);
-			
-			PreGD preconditions = PreGD.create(
-					PrefGD.create(applyingRule)
-			); 
-			
-			// One effect per rule plus one per the destination state and one for priority and one for adaptation
-			CEffect[] and = new CEffect[rule.action.size() + 3];
 			
 			int i = 0;
 			for (Assignment a : rule.action) {
@@ -327,15 +288,11 @@ public class AfsmParser {
 			
 			PEffect resetPriority = createPEffectResetPriority();
 			and[i++] = CEffect.create(resetPriority);
-
-			PEffect resetAdaptation = createPEffectResetAdaptation();
-			and[i++] = CEffect.create(resetAdaptation);
-
 			
 			Effect effect = Effect.and(and);
 			
 			
-			ActionSymbol actionSymbol = ActionSymbol.create("applied_rule_" + rule.getName());
+			ActionSymbol actionSymbol = ActionSymbol.create("rule_" + rule.getName());
 			ActionDefBody actionDefBody = ActionDefBody.create(preconditions, effect);			
 			
 			ActionDef actionDef = ActionDef.create(actionSymbol, variables, actionDefBody);
@@ -343,7 +300,6 @@ public class AfsmParser {
 			
 			defs.add(struct);
 		}
-		
 		
 		// Add events to satisfy/unsatisfy each variables
 		for (String key : afsm.variables.keySet()) {
@@ -438,38 +394,6 @@ public class AfsmParser {
 		return defs;
 	}
 
-	
-	private GD createApplyingAdaptationGD(Rule rule) {
-		return createApplyingAdaptationGD(afsm.rules.indexOf(rule));
-	}
-	
-	private GD createApplyingAdaptationGD(int ruleIndex) {
-		return GD.createFluent(
-				FComp.create(
-						BinaryComp.equals(), 
-						FExp.create(FHead.create(ADAPTATION_FUNCTION_SYMBOL)),
-						FExp.create(Number.create(ruleIndex))));
-	}
-
-	
-	private PEffect createPEffectSetAdaptation(Rule rule) {
-		PEffect resetPriority = PEffect.fluent(
-				AssignOp.assign(), 
-				FHead.create(ADAPTATION_FUNCTION_SYMBOL),
-				// Reset the priority
-				FExp.create(Number.create(afsm.rules.indexOf(rule))));
-		return resetPriority;
-	}
-	
-	private PEffect createPEffectResetAdaptation() {
-		PEffect resetPriority = PEffect.fluent(
-				AssignOp.assign(), 
-				FHead.create(ADAPTATION_FUNCTION_SYMBOL),
-				// Reset the priority
-				FExp.create(Number.create(-1)));
-		return resetPriority;
-	}
-	
 	private PEffect createPEffectResetPriority() {
 		PEffect resetPriority = PEffect.fluent(
 				AssignOp.assign(), 
@@ -489,7 +413,15 @@ public class AfsmParser {
 			// Add context
 			variables = createTypedList(CONTEXT_VARIABLE, CONTEXT_TYPE, variables);
 			
-			Effect increasePriority = Effect.create(createEffectSetPriority(i + 1));
+			Effect increasePriority = Effect.create(
+					CEffect.create(
+							PEffect.fluent(
+									AssignOp.assign(), 
+									FHead.create(PRIORITY_FUNCTION_SYMBOL),
+									FExp.create(Number.create(i + 1))
+							)
+					)
+			);
 			
 			PreGD preconditions = createPreconditionForPriorityAt(i);
 			
@@ -503,16 +435,6 @@ public class AfsmParser {
 		}
 		
 		return defs;
-	}
-	
-	private CEffect createEffectSetPriority(int p) {
-		return CEffect.create(
-				PEffect.fluent(
-						AssignOp.assign(), 
-						FHead.create(PRIORITY_FUNCTION_SYMBOL),
-						FExp.create(Number.create(p))
-				)
-		);
 	}
 	
 	private PreGD createPreconditionForPriorityAt(int currentPriority) {
@@ -762,15 +684,13 @@ public class AfsmParser {
 	}
 	
 	public InitEl createStateInitEl(State s) {
+		//return AtomicFormula.create(predicates.get(s.getName()), STATE_VARIABLE_NAME);
 		return InitEl.create(FHead.create(STATE_FUNCTION_SYMBOL), stateNumber.get(s));
 	}
 	
 	public InitEl createPriotityInitEl(int p) {
+		//return AtomicFormula.create(predicates.get(s.getName()), STATE_VARIABLE_NAME);
 		return InitEl.create(FHead.create(PRIORITY_FUNCTION_SYMBOL), Number.create(p));
-	}
-	
-	public InitEl createAdaptationInitEl(int p) {
-		return InitEl.create(FHead.create(ADAPTATION_FUNCTION_SYMBOL), Number.create(p));
 	}
 	
 	public GD createStateGDForProblem(State s) {
@@ -780,15 +700,14 @@ public class AfsmParser {
 		return GD.createFluent(fComp);
 	}
 	
-	public GD createPriorityGDForProblem(Rule rule) {
-		FComp fComp = FComp.create(BinaryComp.equals(),
-				FExp.create(FHead.create(ADAPTATION_FUNCTION_SYMBOL)),
-				FExp.create(Number.create(afsm.rules.indexOf(rule))));
-		return GD.createFluent(fComp);
-	}
-	
 	public GD createInStateAssumptionGDForProblem(State s) {
 		return parsePredicate(s.getInStateAssumption(), Term.create(CONTEXT_VARIABLE_NAME), true);
+	}
+	
+	public GD createPriorityGDForProblem(int p) {
+		return GD.createFluent(FComp.create(BinaryComp.equals(),
+				FExp.create(FHead.create(PRIORITY_FUNCTION_SYMBOL)),
+				FExp.create(Number.create(p))));
 	}
 	
 	public List<Literal<Name>> createInitiContextLiteralsForProblem() {

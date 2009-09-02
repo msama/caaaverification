@@ -49,6 +49,7 @@ public class NondeterministicProblemGenerator extends ProblemGenerator {
 						PreGD.create(
 								PrefGD.create(
 										GD.createAnd(getCommonStatesGD(rule1,rule2),
+												parser.createPriorityGDForProblem(rule1.getPriority()),
 												parser.createRuleGDForProblem(rule1), 
 												parser.createRuleGDForProblem(rule2)))
 								)

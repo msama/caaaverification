@@ -68,9 +68,9 @@ public abstract class ProblemGenerator {
 		// Initial state
 		elements.add(parser.createStateInitEl(afsm.getInitialState()));
 		elements.add(parser.createPriotityInitEl(Rule.MAX_PRIORITY));
-		elements.add(parser.createAdaptationInitEl(-1));
 		// Context
 		//list.addAll(parser.createInitiContextLiteralsForProblem());
 		return Init.create(elements);
 	}
 }
+
