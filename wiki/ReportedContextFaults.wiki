@@ -2,7 +2,7 @@
 
 = Introduction =
 
-Add your content here.
+This is a list of reported context awareness faults which we have found on the web. Feel free to report more.
 
 
 = Details =
